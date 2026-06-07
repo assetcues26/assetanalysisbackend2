@@ -16,7 +16,7 @@ from app.services.demo_catalog import load_demo_catalog
 
 def test_macbook_nbv_matches_erp_register():
     """CIPLA register shows NBV 3,104 on cost 62,080 — SLM to salvage after full life."""
-    far = compute_slm_far(62080, date(2010, 1, 14), 3.0, as_of=FAR_AS_OF_DATE)
+    far = compute_slm_far(62080, date(2021, 1, 14), 3.0, as_of=FAR_AS_OF_DATE)
     assert far["book_nbv_inr"] == 3104
     assert far["residual_value_inr"] == 3104
     assert far["accumulated_depreciation_inr"] == 58976
@@ -33,13 +33,13 @@ def test_enrich_catalog_item_computes_nbv():
         {
             "catalog_id": "ac-001",
             "subcategory": "Split AC",
-            "acquisition_date": "2019-06-15",
+            "acquisition_date": "2021-06-15",
             "original_cost_inr": 28500,
             "useful_life_years": 15,
         }
     )
-    assert item["book_nbv_inr"] == 15903
-    assert item["accumulated_depreciation_inr"] == 12597
+    assert item["book_nbv_inr"] == 19516
+    assert item["accumulated_depreciation_inr"] == 8984
     assert item["depreciation_method"] == "SLM"
 
 

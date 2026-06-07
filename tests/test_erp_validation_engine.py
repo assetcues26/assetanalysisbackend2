@@ -29,9 +29,9 @@ def _ctx(**overrides):
         model="IN1630V3Q",
         category="HVAC",
         subcategory="Split AC",
-        acquisition_date=date(2019, 6, 15),
+        acquisition_date=date(2021, 6, 15),
         original_cost_inr=28500,
-        book_nbv_inr=15903,
+        book_nbv_inr=19516,
         location="Mumbai, Maharashtra",
         asset_tag_number="100301912005536",
     )

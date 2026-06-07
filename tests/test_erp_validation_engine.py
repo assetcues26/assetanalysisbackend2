@@ -31,7 +31,7 @@ def _ctx(**overrides):
         subcategory="Split AC",
         acquisition_date=date(2019, 6, 15),
         original_cost_inr=28500,
-        book_nbv_inr=14200,
+        book_nbv_inr=15903,
         location="Mumbai, Maharashtra",
         asset_tag_number="100301912005536",
     )

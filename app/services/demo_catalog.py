@@ -6,6 +6,8 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
+from app.services.catalog_far import enrich_catalog
+
 CATALOG_PATH = Path(__file__).resolve().parent.parent / "data" / "demo_catalog.json"
 
 
@@ -14,7 +16,7 @@ def load_demo_catalog() -> list[dict]:
     data = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
     if not isinstance(data, list):
         raise ValueError("demo_catalog.json must be a JSON array")
-    return data
+    return enrich_catalog(data)
 
 
 def get_catalog_item(catalog_id: str) -> dict | None:

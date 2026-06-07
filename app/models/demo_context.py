@@ -21,6 +21,12 @@ class DemoContext(BaseModel):
     book_nbv_inr: float = Field(ge=0)
     location: str
     asset_tag_number: Optional[str] = None
+    asset_number: Optional[str] = None
+    depreciation_method: Optional[str] = None
+    useful_life_years: Optional[float] = None
+    accumulated_depreciation_inr: Optional[float] = None
+    annual_depreciation_inr: Optional[float] = None
+    residual_value_inr: Optional[float] = None
 
     @field_validator("asset_name", "location")
     @classmethod

@@ -42,7 +42,7 @@ def test_demo_catalog_endpoint(client):
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 10
+    assert len(data) == 9
     assert data[0]["catalog_id"] == "ac-001"
 
 

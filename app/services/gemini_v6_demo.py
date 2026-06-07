@@ -42,6 +42,26 @@ def build_demo_context_block(ctx: DemoContext) -> str:
     climate = _CLIMATE_NOTES.get(profile, _CLIMATE_NOTES["moderate"])
     age_years = _years_since(ctx.acquisition_date)
     tag_line = ctx.asset_tag_number or "(not provided — read from images if visible)"
+    accum_line = (
+        f"accumulated_depreciation_inr: {ctx.accumulated_depreciation_inr:,.0f}\n"
+        if ctx.accumulated_depreciation_inr is not None
+        else "accumulated_depreciation_inr: —\n"
+    )
+    annual_line = (
+        f"annual_depreciation_inr: {ctx.annual_depreciation_inr:,.0f}\n"
+        if ctx.annual_depreciation_inr is not None
+        else "annual_depreciation_inr: —\n"
+    )
+    residual_line = (
+        f"residual_value_inr: {ctx.residual_value_inr:,.0f}\n"
+        if ctx.residual_value_inr is not None
+        else "residual_value_inr: —\n"
+    )
+    life_line = (
+        f"useful_life_years: {ctx.useful_life_years}\n"
+        if ctx.useful_life_years is not None
+        else "useful_life_years: —\n"
+    )
     return (
         "\n\n=== INJECTED ERP DEMO CONTEXT (GROUND TRUTH) ===\n"
         f"catalog_id: {ctx.catalog_id}\n"
@@ -55,6 +75,11 @@ def build_demo_context_block(ctx: DemoContext) -> str:
         f"asset_age_years_approx: {age_years:.1f}\n"
         f"original_cost_inr: {ctx.original_cost_inr:,.0f}\n"
         f"book_nbv_inr: {ctx.book_nbv_inr:,.0f}\n"
+        f"depreciation_method: {ctx.depreciation_method or 'SLM'}\n"
+        f"{life_line}"
+        f"{accum_line}"
+        f"{annual_line}"
+        f"{residual_line}"
         f"location: {ctx.location}\n"
         f"location_profile: {profile}\n"
         f"climate_notes: {climate}\n"

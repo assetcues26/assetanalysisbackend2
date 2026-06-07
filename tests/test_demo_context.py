@@ -19,12 +19,12 @@ def test_demo_context_valid():
         subcategory="Split AC",
         acquisition_date=date(2019, 6, 15),
         original_cost_inr=28500,
-        book_nbv_inr=14200,
+        book_nbv_inr=15903.0,
         location="Mumbai, Maharashtra",
         asset_tag_number="100301912005536",
     )
     assert ctx.catalog_id == "ac-001"
-    assert ctx.book_nbv_inr == 14200
+    assert ctx.book_nbv_inr == 15903
 
 
 def test_demo_context_requires_name_and_location():
@@ -68,7 +68,7 @@ def test_build_demo_verification_tag_match():
         subcategory="Split AC",
         acquisition_date=date(2019, 6, 15),
         original_cost_inr=28500,
-        book_nbv_inr=14200,
+        book_nbv_inr=15903.0,
         location="Mumbai, Maharashtra",
         asset_tag_number="100301912005536",
     )

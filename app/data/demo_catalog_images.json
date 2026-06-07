@@ -1,0 +1,440 @@
+{
+  "generated_on": "2026-06-07",
+  "valuation_date": "2026-06-07",
+  "notes": "Free-use stock images matched to catalog asset type and ~4–5 year office/plant age (acquired 2021–2022). Mix of best/good/average/fair/damaged per asset for V6 demo uploads. Prefer direct download URLs; Wikimedia CC BY-SA may require attribution.",
+  "condition_scale": ["best", "good", "average", "fair", "damaged"],
+  "assets": [
+    {
+      "catalog_id": "ac-001",
+      "asset_name": "Micromax Split AC",
+      "acquisition_date": "2021-06-15",
+      "asset_age_years": 4.98,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "indoor_unit",
+          "description": "Clean modern split indoor wall unit (installed setting)",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/1/12/Modern_split-type_air_conditioner_at_a_school.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Modern_split-type_air_conditioner_at_a_school.jpg"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "indoor_unit",
+          "description": "Split indoor evaporator unit, maintained",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Daitsu_split-type_air_conditioner_indoor_unit.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Daitsu_split-type_air_conditioner_indoor_unit.jpg"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "outdoor_unit",
+          "description": "Outdoor condenser ~5yr typical plant install, light weathering",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/9/94/YORK_(BRAND_FROM_JOHNSON_CONTROLS)_AIR_CONDITIONER_OUTDOOR_UNIT_(6).jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:YORK_(BRAND_FROM_JOHNSON_CONTROLS)_AIR_CONDITIONER_OUTDOOR_UNIT_(6).jpg"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "outdoor_unit",
+          "description": "Aged outdoor unit on corroded exterior wall",
+          "license": "Pakutaso free (commercial OK, read terms)",
+          "download_url": "https://www.pakutaso.com/en/20240747211post-51852.html",
+          "page_url": "https://www.pakutaso.com/en/20240747211post-51852.html"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "outdoor_unit",
+          "description": "Heavily rusted outdoor AC unit — poor/FAR write-down scenario",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/Y4VXRTt9lAc/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-rusty-air-conditioner-sitting-on-top-of-a-wall-Y4VXRTt9lAc"
+        }
+      ]
+    },
+    {
+      "catalog_id": "laptop-002",
+      "asset_name": "Dell Latitude 5420 Laptop",
+      "acquisition_date": "2021-03-10",
+      "asset_age_years": 5.24,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "Clean business laptop on desk — near-new cosmetic",
+          "license": "Pexels License",
+          "download_url": "https://www.pexels.com/photo/8284722/download/",
+          "page_url": "https://www.pexels.com/photo/black-and-silver-laptop-computer-8284722/"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "in_use",
+          "description": "Dell laptop in active office use (~5yr fleet unit)",
+          "license": "Pexels License",
+          "download_url": "https://www.pexels.com/photo/3197390/download/",
+          "page_url": "https://www.pexels.com/photo/man-using-dell-laptop-3197390/"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "keyboard_closeup",
+          "description": "Laptop workspace with normal daily wear",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/ms-QnzmKGVM/download?force=true",
+          "page_url": "https://unsplash.com/photos/turned-on-macbook-pro-on-desk-ms-QnzmKGVM"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "full_asset",
+          "description": "Opened laptop with visible screen damage — fair/impaired",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/OIUpXdhfJ1w/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-person-holding-a-pencil-and-a-broken-laptop-OIUpXdhfJ1w"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "full_asset",
+          "description": "Broken laptop — salvage / write-off test case",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/SMHx_spBYx0/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-broken-laptop-computer-sitting-on-top-of-a-table-SMHx_spBYx0"
+        }
+      ]
+    },
+    {
+      "catalog_id": "printer-003",
+      "asset_name": "HP LaserJet Pro M404dn",
+      "acquisition_date": "2021-11-20",
+      "asset_age_years": 4.55,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "Clean office laser printer on counter",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/CGnoRQZGWmw/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-white-and-black-printer-sitting-on-top-of-a-counter-CGnoRQZGWmw"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "full_asset",
+          "description": "White printer on wooden desk — good shared print-room state",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/G4FbQY2ZjZI/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-white-printer-sitting-on-top-of-a-wooden-desk-G4FbQY2ZjZI"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "full_asset",
+          "description": "HP-class office printer, routine use",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/5AoOejjRUrA/download?force=true",
+          "page_url": "https://unsplash.com/photos/white-and-gray-hp-all-in-one-printer-5AoOejjRUrA"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "paper_tray",
+          "description": "Printer with paper stack — jam/misfeed fair condition",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/CYrYxz-uvE4/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-large-machine-with-a-lot-of-papers-on-it-CYrYxz-uvE4"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "full_asset",
+          "description": "Industrial printer wear — impaired mechanical state",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/Tzm3Oyu_6sk/download?force=true",
+          "page_url": "https://unsplash.com/photos/printing-machine-Tzm3Oyu_6sk"
+        }
+      ]
+    },
+    {
+      "catalog_id": "macbook-004",
+      "asset_name": "Apple MacBook Pro 13\" M1",
+      "acquisition_date": "2022-01-14",
+      "asset_age_years": 4.4,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "MacBook Pro on desk — excellent cosmetic (CIPLA Goa class asset)",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/5-KmbSe5ivg/download?force=true",
+          "page_url": "https://unsplash.com/photos/apple-macbook-pro-on-desk-5-KmbSe5ivg"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "full_asset",
+          "description": "MacBook on wooden desk, normal ~4yr office use",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/mlphGearJHw/download?force=true",
+          "page_url": "https://unsplash.com/photos/macbook-pro-on-brown-wooden-desk-mlphGearJHw"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "full_asset",
+          "description": "MacBook workspace — average wear, daily carry",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/ms-QnzmKGVM/download?force=true",
+          "page_url": "https://unsplash.com/photos/turned-on-macbook-pro-on-desk-ms-QnzmKGVM"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "screen_closeup",
+          "description": "Cracked laptop screen — fair/needs repair",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/OIUpXdhfJ1w/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-person-holding-a-pencil-and-a-broken-laptop-OIUpXdhfJ1w"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "tag_closeup",
+          "description": "Use your real tagged MacBook photo (tag 1000002129) for ERP tag-match demos; stock fallback below",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/SMHx_spBYx0/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-broken-laptop-computer-sitting-on-top-of-a-table-SMHx_spBYx0"
+        }
+      ]
+    },
+    {
+      "catalog_id": "chair-005",
+      "asset_name": "Godrej Prime High Back Mesh",
+      "acquisition_date": "2022-01-18",
+      "asset_age_years": 4.39,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "Ergonomic mesh office chair — excellent",
+          "license": "Pexels License",
+          "download_url": "https://www.pexels.com/photo/1957477/download/",
+          "page_url": "https://www.pexels.com/photo/office-chair-and-desk-1957477/"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "full_asset",
+          "description": "Black rolling office chair at desk — good condition",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/3J8w0F5Nk5k/download?force=true",
+          "page_url": "https://unsplash.com/photos/black-office-rolling-chair-beside-brown-wooden-table-3J8w0F5Nk5k"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "caster_closeup",
+          "description": "Worn chair caster — typical 4yr rolling wear",
+          "license": "CC BY 4.0 (torange.biz)",
+          "download_url": "https://torange.biz/fx/wheel-office-chair-649.jpg",
+          "page_url": "https://torange.biz/wheel-office-chair-649"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "full_asset",
+          "description": "Stack of used wooden office chairs — fair fleet surplus look",
+          "license": "Pexels License (CC0 via Pixabay)",
+          "download_url": "https://www.pexels.com/photo/356065/download/",
+          "page_url": "https://www.pexels.com/photo/room-chair-lot-356065/"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "caster_closeup",
+          "description": "Heavily worn/scratched caster wheel — damaged mobility",
+          "license": "CC BY 4.0 (torange.biz)",
+          "download_url": "https://torange.biz/fx/wheel-office-chair-649.jpg",
+          "page_url": "https://torange.biz/wheel-office-chair-649"
+        }
+      ]
+    },
+    {
+      "catalog_id": "display-006",
+      "asset_name": "Samsung BE55T-H Commercial Display",
+      "acquisition_date": "2021-08-05",
+      "asset_age_years": 4.84,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "wall_mount",
+          "description": "Wall-mounted flat panel — best cosmetic",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/zceI0ftblcM/download?force=true",
+          "page_url": "https://unsplash.com/photos/black-flat-screen-tv-mounted-on-white-wall-zceI0ftblcM"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "conference_room",
+          "description": "Commercial room with wall TV — good working display",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/iuJQd6Op77A/download?force=true",
+          "page_url": "https://unsplash.com/photos/room-with-wall-mounted-tv-table-and-chairs-iuJQd6Op77A"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "digital_signage",
+          "description": "Office digital display in use — average 5yr panel",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/EqWnthd1BCA/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-television-mounted-to-a-wall-in-a-room-EqWnthd1BCA"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "screen_closeup",
+          "description": "Old TV no-signal / degraded panel — fair",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/ZwnnxdqvL1w/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-television-screen-with-a-blue-background-ZwnnxdqvL1w"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "screen_closeup",
+          "description": "Cracked TV screen — damaged write-off",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/vm4W8bZKU2M/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-small-television-sitting-on-top-of-a-table-vm4W8bZKU2M"
+        }
+      ]
+    },
+    {
+      "catalog_id": "gen-007",
+      "asset_name": "Cummins 62.5 kVA C62.5D5P",
+      "acquisition_date": "2021-09-12",
+      "asset_age_years": 4.74,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "generator_set",
+          "description": "Industrial diesel gensets staged for deploy — well maintained",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Diesel_generators_waited_to_be_airlifted,_Nice_Airport,_October_2020.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Diesel_generators_waited_to_be_airlifted,_Nice_Airport,_October_2020.jpg"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "generator_set",
+          "description": "Diesel generator room — good operating condition",
+          "license": "CC BY-SA 3.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/4/41/Champlain_diesel_generators.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Champlain_diesel_generators.jpg"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "engine_closeup",
+          "description": "Diesel engine parts — average plant-age wear",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/JqEY48B4RP4/download?force=true",
+          "page_url": "https://unsplash.com/photos/close-up-of-old-diesel-engines-and-parts-JqEY48B4RP4"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "engine_closeup",
+          "description": "Rusty blue industrial engine — fair corrosion",
+          "license": "Public Domain (Piqsels)",
+          "download_url": "https://cdn.piqsels.com/public-domain-photo-fksci.jpg",
+          "page_url": "https://www.piqsels.com/en/public-domain-photo-fksci"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "generator_set",
+          "description": "Museum/display aged diesel genset — severe wear reference",
+          "license": "CC BY-SA 3.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/53/Ruston_6VE_and_dynamo.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Ruston_6VE_and_dynamo.jpg"
+        }
+      ]
+    },
+    {
+      "catalog_id": "cooler-009",
+      "asset_name": "Blue Star BWD3FMRGA Water Dispenser",
+      "acquisition_date": "2021-05-30",
+      "asset_age_years": 4.94,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "Office water dispenser with bottle — excellent",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/sTwRC4kLtOs/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-glass-water-dispenser-and-drinking-glasses-sTwRC4kLtOs"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "full_asset",
+          "description": "Water cooler in professional office",
+          "license": "FreeImages Content License",
+          "download_url": "https://www.freeimages.com/photo/businesswoman-standing-by-water-cooler-with-lcd-monitors-2097614",
+          "page_url": "https://www.freeimages.com/photo/businesswoman-standing-by-water-cooler-with-lcd-monitors-2097614"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "full_asset",
+          "description": "Standard office water cooler — average ~5yr unit",
+          "license": "Unsplash License (illustration)",
+          "download_url": "https://unsplash.com/illustrations/Met_Jbm6Qvw/download?force=true",
+          "page_url": "https://unsplash.com/illustrations/green-water-cooler-with-blue-water-bottle-Met_Jbm6Qvw"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "outdoor_unit",
+          "description": "Old outdoor-adjacent appliance wear (proxy for aged cooler housing)",
+          "license": "Pakutaso free",
+          "download_url": "https://www.pakutaso.com/en/20260433113post-57132.html",
+          "page_url": "https://www.pakutaso.com/en/20260433113post-57132.html"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "full_asset",
+          "description": "Rusty aged appliance — damaged/leaking scenario proxy",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/Y4VXRTt9lAc/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-rusty-air-conditioner-sitting-on-top-of-a-wall-Y4VXRTt9lAc"
+        }
+      ]
+    },
+    {
+      "catalog_id": "vehicle-010",
+      "asset_name": "Tata Nexon XZ+ Petrol",
+      "acquisition_date": "2021-02-14",
+      "asset_age_years": 5.31,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "front_view",
+          "description": "Tata Nexon XZA+ front — excellent cosmetic (same model family)",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/e/e5/2023_Tata_Nexon_XZA+_front_view.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:2023_Tata_Nexon_XZA+_front_view.jpg"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "three_quarter",
+          "description": "Tata Nexon dual-tone — good fleet condition",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Tata_Nexon_Blue_Dual_Tone.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Tata_Nexon_Blue_Dual_Tone.jpg"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "front_view",
+          "description": "2018 Tata Nexon XM — average ~5yr company car",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/88/2018_Tata_Nexon_XM.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:2018_Tata_Nexon_XM.jpg"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "body_panel",
+          "description": "Scratched/dented grey car fender — fair body damage",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/F_EZo6Rr_bE/download?force=true",
+          "page_url": "https://unsplash.com/photos/damaged-grey-car-fender-with-cracked-paint-F_EZo6Rr_bE"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "rear_view",
+          "description": "Heavy scratch damage on SUV rear panel",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/F_EZo6Rr_bE/download?force=true",
+          "page_url": "https://unsplash.com/photos/damaged-grey-car-fender-with-cracked-paint-F_EZo6Rr_bE"
+        }
+      ]
+    }
+  ]
+}

@@ -16,7 +16,7 @@ DEFAULT_RESIDUAL_PCT = 0.05
 USEFUL_LIFE_BY_SUBCATEGORY: dict[str, float] = {
     "split ac": 15.0,
     "window ac": 15.0,
-    "laptop": 3.0,
+    "laptop": 5.0,
     "desktop": 3.0,
     "printer": 5.0,
     "display": 5.0,
@@ -35,8 +35,10 @@ def resolve_useful_life_years(item: dict[str, Any]) -> float:
     for key, life in USEFUL_LIFE_BY_SUBCATEGORY.items():
         if key in sub:
             return life
-    if "laptop" in cat or "it assets" in cat or "it equipment" in cat:
-        return 3.0
+    if "laptop" in sub or "laptop" in cat or "it assets" in cat:
+        return 5.0
+    if "desktop" in sub or "desktop" in cat:
+        return USEFUL_LIFE_BY_SUBCATEGORY["desktop"]
     if "hvac" in cat:
         return 15.0
     if "vehicle" in cat:

@@ -14,18 +14,26 @@ from app.services.catalog_far import (
 from app.services.demo_catalog import load_demo_catalog
 
 
-def test_macbook_nbv_matches_erp_register():
-    """CIPLA register shows NBV 3,104 on cost 62,080 — SLM to salvage after full life."""
-    far = compute_slm_far(62080, date(2021, 1, 14), 3.0, as_of=FAR_AS_OF_DATE)
-    assert far["book_nbv_inr"] == 3104
-    assert far["residual_value_inr"] == 3104
-    assert far["accumulated_depreciation_inr"] == 58976
+def test_macbook_nbv_mid_life_with_realistic_cost():
+    """2022 M1 MacBook Pro India corporate cost — partial SLM after ~4.4 years."""
+    far = compute_slm_far(154900, date(2022, 1, 14), 5.0, as_of=FAR_AS_OF_DATE)
+    assert far["book_nbv_inr"] == 25573
+    assert far["residual_value_inr"] == 7745.0
+    assert far["accumulated_depreciation_inr"] == 129327
+    assert far["asset_age_years"] < 5
+
+
+def test_laptop_partially_depreciated_mid_life():
+    far = compute_slm_far(72000, date(2023, 3, 10), 5.0, as_of=FAR_AS_OF_DATE)
+    assert far["book_nbv_inr"] > 3600
+    assert far["book_nbv_inr"] < 72000
+    assert far["asset_age_years"] < 5
 
 
 def test_laptop_fully_depreciated_after_useful_life():
-    far = compute_slm_far(72000, date(2021, 3, 10), 3.0, as_of=FAR_AS_OF_DATE)
+    far = compute_slm_far(72000, date(2021, 3, 10), 5.0, as_of=FAR_AS_OF_DATE)
     assert far["book_nbv_inr"] == 3600
-    assert far["asset_age_years"] > 3
+    assert far["asset_age_years"] > 5
 
 
 def test_enrich_catalog_item_computes_nbv():
@@ -48,7 +56,8 @@ def test_load_demo_catalog_enriched():
     catalog = load_demo_catalog()
     assert len(catalog) == 9
     macbook = next(a for a in catalog if a["catalog_id"] == "macbook-004")
-    assert macbook["book_nbv_inr"] == 3104
+    assert macbook["book_nbv_inr"] == 25573
+    assert macbook["original_cost_inr"] == 154900
     assert macbook["asset_number"] == "1000002129"
     for row in catalog:
         assert row["book_nbv_inr"] <= row["original_cost_inr"]
@@ -57,7 +66,7 @@ def test_load_demo_catalog_enriched():
 
 
 def test_resolve_useful_life_defaults():
-    assert resolve_useful_life_years({"subcategory": "Laptop"}) == 3.0
+    assert resolve_useful_life_years({"subcategory": "Laptop"}) == 5.0
     assert resolve_useful_life_years({"category": "HVAC", "subcategory": "Split AC"}) == 15.0
 
 

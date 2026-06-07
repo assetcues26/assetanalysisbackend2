@@ -1,0 +1,176 @@
+{
+  "collage_base64": null,
+  "request_id": "00000000-0000-0000-0000-000000000001",
+  "status": "success",
+  "processing_time_ms": 7200,
+  "analysis_method": "multi_image",
+  "images_analyzed": 3,
+  "review_required": false,
+  "asset": {
+    "name": "Micromax split AC indoor unit",
+    "category": "Air Conditioner",
+    "type": "Split AC indoor unit",
+    "brand": "Micromax",
+    "model": null,
+    "color": "White",
+    "material": "Plastic",
+    "estimated_dimensions": "~80 x 30 x 20 cm",
+    "estimated_age": "~3-5 years (approx. 2021-2023)",
+    "quantity": 1,
+    "serial_number": null,
+    "asset_tag_number": "100301912005536",
+    "specifications": [
+      "R32 refrigerant",
+      "Quad Air Protection",
+      "PM 0.3/PM 2.5 filter"
+    ],
+    "accessories": [],
+    "distinguishing_features": [
+      "Digital temperature display",
+      "Breathe Pure branding"
+    ],
+    "description": "White wall-mounted Micromax split AC indoor unit with illuminated front display and side spec plate."
+  },
+  "condition": {
+    "grade": "Good",
+    "overall_score": 85,
+    "summary": "Clean exterior, functional display, no visible structural damage.",
+    "cosmetic_condition": "Clean white finish",
+    "structural_condition": "Intact casing",
+    "functional_status": "Appears functional",
+    "cleanliness": "Clean",
+    "wear_level": "Light",
+    "usability": "Ready to use",
+    "repair_recommendation": "None needed",
+    "estimated_remaining_life": "5-7 years",
+    "missing_parts": [],
+    "functional_issues": [],
+    "positive_aspects": ["Display working", "No visible dents"],
+    "has_damage": false,
+    "damage_count": 0,
+    "damage_by_severity": { "minor": 0, "moderate": 0, "severe": 0 },
+    "damage_items": []
+  },
+  "identifiers": {
+    "asset_tag_number": "100301912005536",
+    "asset_tag_number_raw": "100301912005536",
+    "tag_readable": true,
+    "tag_position": "Lower-right of the right side panel, on a white printed sticker just below the spec/rating plate and above the warranty label, about 4-5 cm from the bottom edge, bars oriented horizontally — visible in Image 2.",
+    "tag_detection_reasoning": "Digits printed below 1D barcode on side spec plate.",
+    "visible_labels": [
+      "5 Years Comprehensive Warranty",
+      "Breathe Pure with Quad Air Protection",
+      "Q.C. PASS",
+      "PM 0.3",
+      "PM 2.5"
+    ],
+    "barcode": {
+      "present": true,
+      "readable": true,
+      "placement": {
+        "asset_location": "right side panel",
+        "horizontal": "right",
+        "vertical": "center",
+        "seen_in_image": 2,
+        "in_frame_position": "center",
+        "description": "Lower-right of the right side panel, on a white printed sticker just below the spec/rating plate and above the warranty label, about 4-5 cm from the bottom edge, bars oriented horizontally — visible in Image 2."
+      },
+      "detection_reasoning": "Digits printed below 1D barcode on side spec plate."
+    },
+    "stickers": [
+      {
+        "label_text": "5 Years Comprehensive Warranty",
+        "sticker_type": "warranty",
+        "placement": {
+          "asset_location": "front panel",
+          "horizontal": "left",
+          "vertical": "top",
+          "seen_in_image": 1,
+          "in_frame_position": "top left",
+          "description": null
+        }
+      },
+      {
+        "label_text": "Q.C. PASS",
+        "sticker_type": "other",
+        "placement": {
+          "asset_location": "right side panel",
+          "horizontal": "right",
+          "vertical": "top",
+          "seen_in_image": 2,
+          "in_frame_position": "top right",
+          "description": null
+        }
+      },
+      {
+        "label_text": "PM 0.3",
+        "sticker_type": "spec",
+        "placement": {
+          "asset_location": "right side panel",
+          "horizontal": "right",
+          "vertical": "top",
+          "seen_in_image": 2,
+          "in_frame_position": "top right",
+          "description": null
+        }
+      },
+      {
+        "label_text": "Breathe Pure branding",
+        "sticker_type": "brand",
+        "placement": {
+          "asset_location": "front panel",
+          "horizontal": "right",
+          "vertical": "top",
+          "seen_in_image": 1,
+          "in_frame_position": "top right",
+          "description": null
+        }
+      }
+    ]
+  },
+  "valuation": {
+    "as_is": {
+      "usd": { "min": 150, "max": 250 },
+      "inr": { "min": 15000, "max": 25000 }
+    },
+    "like_new_reference": {
+      "usd": { "min": 300, "max": 450 },
+      "inr": { "min": 30000, "max": 45000 }
+    },
+    "currency_note": "INR values use a fixed rate of 1 USD = configured rate.",
+    "confidence": 0.8,
+    "assumptions": "Residential split AC indoor unit in good cosmetic order.",
+    "disclaimer": "AI-generated estimate from images only; not a certified appraisal. Verify before financial decisions."
+  },
+  "confidence": {
+    "overall": 0.92,
+    "asset_name": 0.95,
+    "asset_condition": 0.9,
+    "asset_description": 0.93,
+    "asset_tag_number": 1.0,
+    "valuation": 0.8
+  },
+  "token_usage": {
+    "input_tokens": 5064,
+    "output_tokens": 1125,
+    "total_tokens": 6189,
+    "image_tokens": 3267,
+    "text_tokens": 1797,
+    "images_sent_to_gemini": 3,
+    "per_image_token_budget": 1120,
+    "estimated_image_tokens": 3360
+  },
+  "cost": {
+    "model": "gemini-3.1-flash-lite",
+    "input_usd_per_1m": 0.25,
+    "output_usd_per_1m": 1.5,
+    "input_cost_usd": 0.001266,
+    "output_cost_usd": 0.001688,
+    "total_cost_usd": 0.002954,
+    "usd_to_inr": 100,
+    "total_cost_inr": 0.2954,
+    "fx_source": "fixed_rate",
+    "fx_is_fallback": false,
+    "fx_as_of": null
+  }
+}

@@ -1,0 +1,93 @@
+"""Application configuration."""
+
+from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-3.1-flash-lite"
+    gemini_thinking_enabled: bool = False
+    gemini_thinking_budget: int = 2048
+    min_images: int = 1
+    max_images: int = 10
+    max_image_size_mb: int = 15
+    max_preprocess_edge_px: int = 2048
+    max_gemini_payload_mb: int = 18
+    gemini_analyze_temperature: float = 0.0
+    gemini_max_output_tokens: int = 8192
+
+    # Detail vs cost lever (SDK supports low/medium/high; ultra_high not available -> clamps to high)
+    media_resolution_collage: str = "high"
+    media_resolution_multi: str = "high"
+
+    # Pricing for cost estimates (USD per 1M tokens); override per deployed model
+    gemini_input_usd_per_1m: float = 0.25
+    gemini_output_usd_per_1m: float = 1.50
+
+    # USD->INR. Production: FX_ENABLED=true (live rate + fallback). Dev can use fixed rate.
+    fx_enabled: bool = True
+    fx_api_url: str = "https://api.frankfurter.dev/v1/latest"
+    fx_cache_ttl_seconds: int = 3600
+    fx_timeout_seconds: float = 4.0
+    usd_to_inr_fallback: float = 83.0
+
+    # Valuation tables (JSON). Override path to hot-swap without redeploying code.
+    reference_prices_path: str = ""
+
+    rate_limit_per_minute: int = 60
+    gemini_max_retries: int = 2
+    # 0 = no hard cap on Gemini call duration (wait_for disabled)
+    gemini_timeout_seconds: int = 30
+    gemini_hard_timeout_seconds: int = 0
+
+    # 0 = do not log slow-request warnings against a target
+    analysis_target_ms: int = 0
+    max_images_latency_mode: int = 6
+
+    review_confidence_threshold: float = 0.65
+    field_confidence_threshold: float = 0.5
+    valuation_confidence_threshold: float = 0.75
+
+    prompt_version: str = "v2"
+
+    # India-first client defaults
+    default_locale: str = "en-IN"
+    market_region: str = "IN"
+    display_currency: str = "INR"
+
+    allowed_mime_types: tuple[str, ...] = (
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+    )
+
+    @property
+    def max_image_size_bytes(self) -> int:
+        return self.max_image_size_mb * 1024 * 1024
+
+    @property
+    def max_gemini_payload_bytes(self) -> int:
+        """Total inline payload budget for a single Gemini API call."""
+        return self.max_gemini_payload_mb * 1024 * 1024
+
+    @property
+    def max_multipart_part_bytes(self) -> int:
+        """Per-part cap for multipart uploads (well above per-file image limit)."""
+        return max(self.max_image_size_bytes * 2, 32 * 1024 * 1024)
+
+    def max_preprocess_edge_for_count(self, image_count: int) -> int:
+        """Adaptive resize to stay within the 10s server budget."""
+        if image_count <= 1:
+            return min(self.max_preprocess_edge_px, 2048)
+        if image_count <= 5:
+            return min(self.max_preprocess_edge_px, 1280)
+        return min(self.max_preprocess_edge_px, 1024)
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

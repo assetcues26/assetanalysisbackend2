@@ -1,0 +1,13 @@
+[project]
+name = "assetcuesassetanalysis-api"
+version = "1.0.0"
+requires-python = ">=3.11"
+
+[tool.vercel]
+entrypoint = "app.main:app"
+
+[tool.uvicorn]
+app = "app.main:app"
+host = "0.0.0.0"
+port = 8000
+reload = true

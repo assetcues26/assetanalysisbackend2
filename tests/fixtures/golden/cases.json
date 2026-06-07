@@ -1,0 +1,48 @@
+[
+  {
+    "id": "dell_laptop_fair",
+    "category": "Laptop",
+    "brand": "Dell",
+    "model": "Latitude 5420",
+    "market_segment": "it_equipment",
+    "reference_like_new_usd": 900,
+    "age_years": 3,
+    "condition_score": 62,
+    "damage_severity": ["moderate", "minor"],
+    "expect_identity_pass": true,
+    "expect_valuation_status": ["ok", "indicative_only"],
+    "expect_as_is_lte_like_new": true
+  },
+  {
+    "id": "industrial_scratch_minor",
+    "category": "Industrial machine",
+    "market_segment": "industrial",
+    "damage_type": "scratch",
+    "damage_severity": "minor",
+    "expect_repair_needed": "none",
+    "expect_acceptable_wear": true
+  },
+  {
+    "id": "phone_ambiguous_identity",
+    "category": "Smartphone",
+    "brand": "Apple",
+    "model": "Unidentified",
+    "confidence_asset_name": 0.5,
+    "candidate_count": 1,
+    "expect_identity_pass": false,
+    "expect_valuation_status": ["indicative_only"]
+  },
+  {
+    "id": "damage_pushes_as_is_below_nbv",
+    "category": "Laptop",
+    "brand": "Dell",
+    "model": "Latitude 5420",
+    "market_segment": "it_equipment",
+    "reference_like_new_usd": 1000,
+    "age_years": 2,
+    "condition_score": 35,
+    "damage_severity": ["severe", "severe", "moderate"],
+    "expect_identity_pass": true,
+    "expect_nbv_exceeds_as_is": true
+  }
+]

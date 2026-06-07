@@ -1,0 +1,35 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Test / cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime / local output
+storage/
+app/output.json
+*-output.json
+teast.json
+*.log
+
+# IDE / OS
+.cursor/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Vercel local
+.vercel/

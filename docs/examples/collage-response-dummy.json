@@ -1,0 +1,157 @@
+{
+  "collage_base64": null,
+  "request_id": "00000000-0000-0000-0000-000000000002",
+  "status": "success",
+  "processing_time_ms": 8800,
+  "analysis_method": "collage",
+  "images_analyzed": 4,
+  "review_required": false,
+  "asset": {
+    "name": "Dell Latitude 5420 laptop",
+    "category": "Laptop",
+    "type": "Business ultrabook",
+    "brand": "Dell",
+    "model": "Latitude 5420",
+    "color": "Black",
+    "material": "Aluminium and plastic",
+    "estimated_dimensions": "~32 x 21 x 2 cm",
+    "estimated_age": "~2021, 3-4 years",
+    "quantity": 1,
+    "serial_number": null,
+    "asset_tag_number": "1234567890123456",
+    "specifications": ["Intel Core i7", "16GB RAM", "512GB SSD"],
+    "accessories": ["power adapter"],
+    "distinguishing_features": ["Dell logo on lid"],
+    "description": "Black 14-inch business laptop; collage shows lid, keyboard, ports, and base asset tag."
+  },
+  "condition": {
+    "grade": "Fair",
+    "overall_score": 62,
+    "summary": "Usable with cosmetic wear; minor dent on lid rear-left.",
+    "cosmetic_condition": "Scuffs on lid",
+    "structural_condition": "Frame solid",
+    "functional_status": "Appears functional",
+    "cleanliness": "Lightly soiled",
+    "wear_level": "Moderate",
+    "usability": "Usable",
+    "repair_recommendation": "Buff lid; inspect hinge",
+    "estimated_remaining_life": "2-4 years",
+    "missing_parts": [],
+    "functional_issues": ["Hinge stiffness noted in panel 1"],
+    "positive_aspects": ["Screen intact", "Keyboard complete"],
+    "has_damage": true,
+    "damage_count": 1,
+    "damage_by_severity": { "minor": 0, "moderate": 1, "severe": 0 },
+    "damage_items": [
+      {
+        "location": "Top lid rear-left",
+        "type": "dent",
+        "severity": "moderate",
+        "seen_in_image": 2,
+        "detail": "~1 cm dent on rear-left lid corner visible in collage panel 2.",
+        "affects_function": false,
+        "repair_action": "Reshape or replace lid panel.",
+        "placement": {
+          "asset_location": "top lid rear-left",
+          "horizontal": "left",
+          "vertical": "top",
+          "seen_in_image": 2,
+          "in_frame_position": "upper-left",
+          "description": null
+        }
+      }
+    ]
+  },
+  "identifiers": {
+    "asset_tag_number": "1234567890123456",
+    "asset_tag_number_raw": "1234567890123456",
+    "tag_readable": true,
+    "tag_position": "Lower-center of the base panel in collage panel 3, on a silver asset-tracking sticker below the service label and left of the vent grille, about 3 cm from the front edge, bars oriented horizontally — visible in panel 3.",
+    "tag_detection_reasoning": "16-digit code under barcode on base, panel 3.",
+    "visible_labels": ["Dell", "Latitude 5420", "Intel Core i7"],
+    "barcode": {
+      "present": true,
+      "readable": true,
+      "placement": {
+        "asset_location": "base panel",
+        "horizontal": "center",
+        "vertical": "bottom",
+        "seen_in_image": 3,
+        "in_frame_position": "lower-center",
+        "description": "Lower-center of the base panel in collage panel 3, on a silver asset-tracking sticker below the service label and left of the vent grille, about 3 cm from the front edge, bars oriented horizontally — visible in panel 3."
+      },
+      "detection_reasoning": "16-digit code under barcode on base, panel 3."
+    },
+    "stickers": [
+      {
+        "label_text": "Dell",
+        "sticker_type": "brand",
+        "placement": {
+          "asset_location": "lid",
+          "horizontal": "center",
+          "vertical": "center",
+          "seen_in_image": 1,
+          "in_frame_position": "center",
+          "description": null
+        }
+      },
+      {
+        "label_text": "Latitude 5420",
+        "sticker_type": "spec",
+        "placement": {
+          "asset_location": "palm rest",
+          "horizontal": "left",
+          "vertical": "bottom",
+          "seen_in_image": 1,
+          "in_frame_position": "lower-left",
+          "description": null
+        }
+      }
+    ]
+  },
+  "valuation": {
+    "as_is": {
+      "usd": { "min": 280, "max": 380 },
+      "inr": { "min": 28000, "max": 38000 }
+    },
+    "like_new_reference": {
+      "usd": { "min": 650, "max": 850 },
+      "inr": { "min": 65000, "max": 85000 }
+    },
+    "currency_note": "INR values use a fixed rate of 1 USD = configured rate.",
+    "confidence": 0.75,
+    "assumptions": "Business laptop with moderate cosmetic wear.",
+    "disclaimer": "AI-generated estimate from images only; not a certified appraisal. Verify before financial decisions."
+  },
+  "confidence": {
+    "overall": 0.88,
+    "asset_name": 0.92,
+    "asset_condition": 0.85,
+    "asset_description": 0.9,
+    "asset_tag_number": 0.98,
+    "valuation": 0.75
+  },
+  "token_usage": {
+    "input_tokens": 2805,
+    "output_tokens": 1100,
+    "total_tokens": 3905,
+    "image_tokens": 1088,
+    "text_tokens": 1717,
+    "images_sent_to_gemini": 1,
+    "per_image_token_budget": 1120,
+    "estimated_image_tokens": 1120
+  },
+  "cost": {
+    "model": "gemini-3.1-flash-lite",
+    "input_usd_per_1m": 0.25,
+    "output_usd_per_1m": 1.5,
+    "input_cost_usd": 0.000701,
+    "output_cost_usd": 0.00165,
+    "total_cost_usd": 0.002351,
+    "usd_to_inr": 100,
+    "total_cost_inr": 0.2351,
+    "fx_source": "fixed_rate",
+    "fx_is_fallback": false,
+    "fx_as_of": null
+  }
+}

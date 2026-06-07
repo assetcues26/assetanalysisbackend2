@@ -193,8 +193,6 @@ def enrich_demo_verification(
             "photo_coverage_score": photo_score,
             "photo_angles": photo_angles,
             "nbv_vs_market_points": _nbv_vs_market_points(valuation),
-            "nbv_vs_market_note": None,
-            "climate_valuation_note": None,
             "validation_warnings": warnings,
             "tag_zoom_hint": tag_zoom,
             "suggests_review": suggests_review,

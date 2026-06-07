@@ -183,4 +183,3 @@ def test_nbv_vs_market_points():
     assert result.nbv_vs_market_points
     joined = " ".join(result.nbv_vs_market_points).lower()
     assert "book nbv" in joined or "below" in joined
-    assert result.nbv_vs_market_note is None

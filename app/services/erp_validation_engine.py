@@ -15,6 +15,7 @@ from app.models.responses import (
     Valuation,
 )
 from app.pipeline.tag_crop import crop_hint_from_placement
+from app.utils.valuation_bullets import dedupe_bullets
 
 _ANGLE_SPECS: tuple[tuple[str, str, str], ...] = (
     ("front", "Front / primary face", "angle_missing_front"),
@@ -90,7 +91,8 @@ def _functional_appearance(condition: ConditionReport) -> str | None:
     return None
 
 
-def _nbv_vs_market_note(valuation: Valuation, climate_note: str | None) -> str | None:
+def _nbv_vs_market_points(valuation: Valuation) -> list[str]:
+    """Book NBV vs market/as-is only — no climate or LLM prose duplication."""
     parts: list[str] = []
     if valuation.nbv and valuation.nbv.method == "erp_book_nbv":
         parts.append("Book NBV from ERP is the accounting baseline on the books.")
@@ -114,9 +116,7 @@ def _nbv_vs_market_note(valuation: Valuation, climate_note: str | None) -> str |
                 parts.append(
                     "Estimated market/as-is value is broadly in line with book NBV."
                 )
-    if climate_note:
-        parts.append(climate_note)
-    return " ".join(parts) if parts else climate_note
+    return dedupe_bullets(parts)
 
 
 def enrich_demo_verification(
@@ -192,9 +192,9 @@ def enrich_demo_verification(
             "functional_appearance": _functional_appearance(condition),
             "photo_coverage_score": photo_score,
             "photo_angles": photo_angles,
-            "nbv_vs_market_note": _nbv_vs_market_note(
-                valuation, base.climate_valuation_note
-            ),
+            "nbv_vs_market_points": _nbv_vs_market_points(valuation),
+            "nbv_vs_market_note": None,
+            "climate_valuation_note": None,
             "validation_warnings": warnings,
             "tag_zoom_hint": tag_zoom,
             "suggests_review": suggests_review,

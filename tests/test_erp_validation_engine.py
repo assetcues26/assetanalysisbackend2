@@ -47,7 +47,7 @@ def _base_verification() -> DemoVerification:
         tag_match_note="match",
         location="Mumbai, Maharashtra",
         location_profile="coastal_humid",
-        climate_valuation_note="Coastal note.",
+        climate_valuation_points=["Coastal note."],
     )
 
 
@@ -161,7 +161,7 @@ def test_tag_zoom_hint_from_barcode_placement():
     assert result.tag_zoom_hint.image_index == 2
 
 
-def test_nbv_vs_market_note():
+def test_nbv_vs_market_points():
     valuation = Valuation(
         as_is=ValuationAmount(
             inr=MoneyRange(min=10000, max=12000),
@@ -180,5 +180,7 @@ def test_nbv_vs_market_note():
         valuation,
         _base_verification(),
     )
-    assert result.nbv_vs_market_note
-    assert "book NBV" in result.nbv_vs_market_note.lower() or "below" in result.nbv_vs_market_note.lower()
+    assert result.nbv_vs_market_points
+    joined = " ".join(result.nbv_vs_market_points).lower()
+    assert "book nbv" in joined or "below" in joined
+    assert result.nbv_vs_market_note is None

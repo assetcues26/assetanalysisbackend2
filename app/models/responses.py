@@ -297,6 +297,7 @@ class DemoVerification(BaseModel):
     location: Optional[str] = None
     location_profile: Optional[str] = None
     climate_valuation_note: Optional[str] = None
+    climate_valuation_points: list[str] = Field(default_factory=list)
     tag_visible: Optional[bool] = None
     tag_readable: Optional[bool] = None
     erp_category: Optional[str] = None
@@ -307,6 +308,7 @@ class DemoVerification(BaseModel):
     photo_coverage_score: Optional[int] = Field(default=None, ge=1, le=5)
     photo_angles: list[PhotoAngleStatus] = Field(default_factory=list)
     nbv_vs_market_note: Optional[str] = None
+    nbv_vs_market_points: list[str] = Field(default_factory=list)
     validation_warnings: list[str] = Field(default_factory=list)
     tag_zoom_hint: Optional[TagZoomHint] = None
     suggests_review: bool = False

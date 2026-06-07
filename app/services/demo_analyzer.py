@@ -26,6 +26,7 @@ from app.models.responses import (
 )
 from app.services.field_merger import normalize_tag_number
 from app.utils.age_display import format_age_years_months
+from app.utils.valuation_bullets import dedupe_bullets, split_prose_to_bullets
 from app.pipeline.image_utils import fit_images_to_budget
 from app.pipeline.preprocess import preprocess_images
 from app.services.analyzer import AssetAnalysisService
@@ -94,11 +95,11 @@ def _money_inr_midpoint(lo: float | None, hi: float | None) -> float | None:
     return (float(lo) + float(hi)) / 2
 
 
-def build_climate_valuation_note(
+def build_climate_valuation_points(
     ctx: DemoContext,
     valuation: Valuation,
     llm: LLMAnalysisResult,
-) -> str:
+) -> list[str]:
     profile = infer_location_profile(ctx.location)
     location = ctx.location
     cat = f"{ctx.category} {ctx.subcategory}".lower()
@@ -173,18 +174,6 @@ def build_climate_valuation_note(
         if valuation.nbv
         else None
     )
-    if as_is_mid is not None and nbv_mid is not None:
-        if as_is_mid < nbv_mid * 0.9:
-            parts.append(
-                "Market/as-is value appears below ERP book NBV — common when climate and condition "
-                "wear outpace straight-line book depreciation."
-            )
-        elif as_is_mid > nbv_mid * 1.1:
-            parts.append(
-                "Market/as-is value appears above ERP book NBV — asset may be holding value well "
-                "for this geography despite age on books."
-            )
-
     llm_note = (
         (llm.valuation_assumptions or "").strip()
         or (getattr(llm.reasoning, "valuation_deliberation_notes", None) or "").strip()
@@ -193,10 +182,10 @@ def build_climate_valuation_note(
     )
     if not llm_note and llm.valuation_inputs and llm.valuation_inputs.valuation_rationale:
         llm_note = llm.valuation_inputs.valuation_rationale.strip()
+    bullets = [p for p in parts if p]
     if llm_note:
-        parts.append(llm_note)
-
-    return " ".join(parts)
+        bullets.extend(split_prose_to_bullets(llm_note))
+    return dedupe_bullets(bullets)
 
 
 def build_demo_verification(
@@ -350,7 +339,7 @@ class DemoAnalysisService:
             update={
                 "location": demo_context.location,
                 "location_profile": infer_location_profile(demo_context.location),
-                "climate_valuation_note": build_climate_valuation_note(
+                "climate_valuation_points": build_climate_valuation_points(
                     demo_context, valuation, llm
                 ),
             }

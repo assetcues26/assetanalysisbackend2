@@ -48,6 +48,7 @@ from app.services.placement_mapper import (
 from app.services.reasoning_summary import build_reasoning_summary
 from app.services.reference_data import reference_data_label
 from app.services.condition_mapper import damage_needs_review, stickers_need_review
+from app.services.erp_validation_engine import enrich_demo_verification
 from app.services.identity_validator import validate_identity
 from app.services.repair_policy import build_repair_plan
 from app.services.valuation_display import client_valuation
@@ -354,6 +355,15 @@ class DemoAnalysisService:
                 ),
             }
         )
+        demo_verification = enrich_demo_verification(
+            demo_context,
+            llm,
+            identifiers,
+            condition,
+            asset,
+            valuation,
+            demo_verification,
+        )
 
         if valuation.status in (ValuationStatus.WITHHELD, ValuationStatus.INDICATIVE_ONLY):
             VALUATION_WITHHELD.labels(status=valuation.status.value).inc()
@@ -378,6 +388,7 @@ class DemoAnalysisService:
                 demo_context.asset_tag_number
                 and not demo_verification.tag_number_match
             )
+            or demo_verification.suggests_review
         )
         stage_timings["engines_ms"] = int((time.perf_counter() - t2) * 1000)
 

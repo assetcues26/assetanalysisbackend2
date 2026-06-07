@@ -108,6 +108,11 @@ def test_demo_analyze_success_mocked():
     assert verify["tag_number_match"] is False
     assert verify["erp_tag_number"] == "100301912005537"
     assert verify["detected_tag_number"] == "1234567890123456"
+    assert "photo_coverage_score" in verify
+    assert verify["photo_coverage_score"] >= 1
+    assert isinstance(verify.get("photo_angles"), list)
+    assert "validation_warnings" in verify
+    assert verify.get("tag_zoom_hint") is not None or verify.get("tag_visible") is not None
 
     nbv = data["valuation"]["nbv"]
     assert nbv is not None

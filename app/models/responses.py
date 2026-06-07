@@ -263,6 +263,23 @@ class ReasoningSummary(BaseModel):
     narrative: Optional[str] = None
 
 
+class TagZoomHint(BaseModel):
+    """Display-only crop region for tag zoom (percentages of image dimensions)."""
+
+    image_index: Optional[int] = None
+    x_pct: float = Field(ge=0.0, le=100.0)
+    y_pct: float = Field(ge=0.0, le=100.0)
+    width_pct: float = Field(gt=0.0, le=100.0)
+    height_pct: float = Field(gt=0.0, le=100.0)
+
+
+class PhotoAngleStatus(BaseModel):
+    id: str
+    label: str
+    required: bool = True
+    satisfied: bool = False
+
+
 class DemoVerification(BaseModel):
     """V6 demo ERP cross-checks (vision vs input payload)."""
 
@@ -280,6 +297,19 @@ class DemoVerification(BaseModel):
     location: Optional[str] = None
     location_profile: Optional[str] = None
     climate_valuation_note: Optional[str] = None
+    tag_visible: Optional[bool] = None
+    tag_readable: Optional[bool] = None
+    erp_category: Optional[str] = None
+    vision_category: Optional[str] = None
+    category_match: Optional[bool] = None
+    rust_corrosion_noted: Optional[bool] = None
+    functional_appearance: Optional[str] = None
+    photo_coverage_score: Optional[int] = Field(default=None, ge=1, le=5)
+    photo_angles: list[PhotoAngleStatus] = Field(default_factory=list)
+    nbv_vs_market_note: Optional[str] = None
+    validation_warnings: list[str] = Field(default_factory=list)
+    tag_zoom_hint: Optional[TagZoomHint] = None
+    suggests_review: bool = False
 
 
 class AnalysisPolicy(BaseModel):

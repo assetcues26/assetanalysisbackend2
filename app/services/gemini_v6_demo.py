@@ -95,6 +95,14 @@ class GeminiV6DemoService(GeminiService):
             )
         if locale != "en":
             prompt += f"\n\nRespond in locale: {locale}."
+        cat = (demo_context.category or "").strip()
+        sub = (demo_context.subcategory or "").strip()
+        if cat or sub:
+            hint = f"{cat} / {sub}".strip(" /")
+            prompt += (
+                f"\n\nASSET CLASS HINT: Apply the playbook section for ERP category "
+                f"'{hint}' (tag locations, damage weighting, repair tolerance)."
+            )
         prompt += (
             "\n\nCLIENT MARKET: India. All valuation reasoning in INR (₹). "
             "Book NBV from ERP is the accounting baseline — as-is market value may differ based on visible condition."

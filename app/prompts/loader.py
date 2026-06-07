@@ -5,6 +5,7 @@ from pathlib import Path
 
 PROMPTS_DIR = Path(__file__).parent
 ANALYSIS_PROMPT = "analysis.txt"
+ANALYSIS_V6_DEMO_PROMPT = "analysis_v6_demo.txt"
 
 
 @lru_cache
@@ -18,3 +19,8 @@ def load_prompt(name: str) -> str:
 def get_analysis_prompt() -> str:
     """Return the asset analysis prompt (one or many images, exhaustive damage)."""
     return load_prompt(ANALYSIS_PROMPT)
+
+
+def get_analysis_v6_demo_prompt() -> str:
+    """Return the V6 demo prompt (ERP context + images, isolated from v1)."""
+    return load_prompt(ANALYSIS_V6_DEMO_PROMPT)

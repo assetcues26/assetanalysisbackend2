@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 
 from app.api.v1.router import api_router, router as v1_router
+from app.api.v6.router import router as v6_router
 from app.middleware.multipart import MultipartSizeMiddleware
 from app.utils.network import get_all_lan_ipv4, get_lan_ipv4
 
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     app.add_middleware(MultipartSizeMiddleware)
 
     app.include_router(v1_router)
+    app.include_router(v6_router)
     app.include_router(api_router)
     app.mount("/metrics", make_asgi_app())
 

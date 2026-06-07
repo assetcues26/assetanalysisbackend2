@@ -22,7 +22,7 @@ def client():
 
 def _demo_context_payload() -> dict:
     return {
-        "catalog_id": "demo-laptop-002",
+        "catalog_id": "laptop-002",
         "asset_name": "Dell Latitude 5420 Laptop",
         "description": "ERP description override",
         "make": "Dell",
@@ -33,7 +33,7 @@ def _demo_context_payload() -> dict:
         "original_cost_inr": 72000,
         "book_nbv_inr": 38500,
         "location": "Bengaluru, Karnataka",
-        "asset_tag_number": "ERP-TAG-001",
+        "asset_tag_number": "100301912005537",
     }
 
 
@@ -43,7 +43,7 @@ def test_demo_catalog_endpoint(client):
     data = response.json()
     assert isinstance(data, list)
     assert len(data) == 10
-    assert data[0]["catalog_id"] == "demo-ac-001"
+    assert data[0]["catalog_id"] == "ac-001"
 
 
 def test_demo_analyze_requires_context(client):
@@ -95,12 +95,19 @@ def test_demo_analyze_success_mocked():
     assert data["images_analyzed"] == 2
 
     asset = data["asset"]
-    assert asset["name"] == ctx["asset_name"]
+    assert asset["name"] == "Dell Latitude 5420 laptop"
+    assert asset["description"]
     assert asset["brand"] == ctx["make"]
     assert asset["model"] == ctx["model"]
     assert asset["category"] == ctx["category"]
     assert asset["type"] == ctx["subcategory"]
-    assert asset["asset_tag_number"] == ctx["asset_tag_number"]
+    assert asset["asset_tag_number"] == "1234567890123456"
+
+    verify = data["demo_verification"]
+    assert verify is not None
+    assert verify["tag_number_match"] is False
+    assert verify["erp_tag_number"] == "100301912005537"
+    assert verify["detected_tag_number"] == "1234567890123456"
 
     nbv = data["valuation"]["nbv"]
     assert nbv is not None

@@ -263,6 +263,25 @@ class ReasoningSummary(BaseModel):
     narrative: Optional[str] = None
 
 
+class DemoVerification(BaseModel):
+    """V6 demo ERP cross-checks (vision vs input payload)."""
+
+    erp_tag_number: Optional[str] = None
+    detected_tag_number: Optional[str] = None
+    detected_tag_number_raw: Optional[str] = None
+    tag_number_match: bool = False
+    tag_match_note: Optional[str] = None
+    erp_make: Optional[str] = None
+    erp_model: Optional[str] = None
+    vision_make: Optional[str] = None
+    vision_model: Optional[str] = None
+    make_match: Optional[bool] = None
+    model_match: Optional[bool] = None
+    location: Optional[str] = None
+    location_profile: Optional[str] = None
+    climate_valuation_note: Optional[str] = None
+
+
 class AnalysisPolicy(BaseModel):
     """Non-secret thresholds and data sources applied for this deployment."""
 
@@ -295,6 +314,7 @@ class AnalyzeResponse(BaseModel):
     confidence: ConfidenceScores
     token_usage: TokenUsage
     cost: CostInfo
+    demo_verification: Optional[DemoVerification] = None
 
 
 class HealthResponse(BaseModel):

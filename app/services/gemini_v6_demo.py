@@ -58,9 +58,9 @@ def build_demo_context_block(ctx: DemoContext) -> str:
         f"location: {ctx.location}\n"
         f"location_profile: {profile}\n"
         f"climate_notes: {climate}\n"
-        f"asset_tag_number_erp: {tag_line}\n"
-        "Use the above as authoritative for identity, age, book NBV baseline, and site climate. "
-        "Images validate condition and visible identifiers only.\n"
+        f"asset_tag_number_erp (compare only — do NOT copy into asset_tag_number): {tag_line}\n"
+        "Use ERP for make/model/category, age, book NBV, and climate. "
+        "Write asset_name and description from images. Read asset_tag_number from photos only.\n"
     )
 
 

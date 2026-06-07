@@ -10,17 +10,22 @@ from typing import BinaryIO
 import structlog
 
 from app.config import Settings
-from app.models.demo_context import DemoContext
+from app.models.demo_context import DemoContext, infer_location_profile
 from app.models.responses import (
     AnalysisPolicy,
     AnalyzeResponse,
     AssetDetails,
+    DemoVerification,
+    Identifiers,
+    LLMAnalysisResult,
     MoneyRange,
     NbvEstimate,
     UnifiedViewMethod,
     Valuation,
     ValuationStatus,
 )
+from app.services.field_merger import normalize_tag_number
+from app.utils.age_display import format_age_years_months
 from app.pipeline.image_utils import fit_images_to_budget
 from app.pipeline.preprocess import preprocess_images
 from app.services.analyzer import AssetAnalysisService
@@ -57,9 +62,12 @@ def _years_since(acquisition: date) -> float:
     return max(0.0, (date.today() - acquisition).days / 365.25)
 
 
+def _norm_identity(value: str | None) -> str:
+    return (value or "").strip().lower()
+
+
 def apply_demo_asset_identity(asset: AssetDetails, ctx: DemoContext) -> AssetDetails:
-    if ctx.asset_name:
-        asset.name = ctx.asset_name
+    """Apply ERP book data; name/description/tag stay from vision (LLM)."""
     if ctx.make:
         asset.brand = ctx.make
     if ctx.model:
@@ -68,14 +76,174 @@ def apply_demo_asset_identity(asset: AssetDetails, ctx: DemoContext) -> AssetDet
         asset.category = ctx.category
     if ctx.subcategory:
         asset.type = ctx.subcategory
-    if ctx.description:
-        asset.description = ctx.description
-    if ctx.asset_tag_number:
-        asset.asset_tag_number = ctx.asset_tag_number
     age = _years_since(ctx.acquisition_date)
-    asset.estimated_age_years = f"{age:.1f}"
-    asset.estimated_age = f"~{age:.1f} years since acquisition ({ctx.acquisition_date.isoformat()})"
+    age_label = format_age_years_months(age)
+    asset.estimated_age_years = age_label
+    asset.estimated_age = f"{age_label} since acquisition ({ctx.acquisition_date.isoformat()})"
     return asset
+
+
+def _money_inr_midpoint(lo: float | None, hi: float | None) -> float | None:
+    if lo is None and hi is None:
+        return None
+    if lo is None:
+        return float(hi)  # type: ignore[arg-type]
+    if hi is None:
+        return float(lo)
+    return (float(lo) + float(hi)) / 2
+
+
+def build_climate_valuation_note(
+    ctx: DemoContext,
+    valuation: Valuation,
+    llm: LLMAnalysisResult,
+) -> str:
+    profile = infer_location_profile(ctx.location)
+    location = ctx.location
+    cat = f"{ctx.category} {ctx.subcategory}".lower()
+
+    profile_labels = {
+        "coastal_humid": "coastal humid (salt air, monsoon moisture)",
+        "dry_hot_dust": "dry hot / dusty inland",
+        "humid_inland": "humid inland",
+        "moderate": "moderate urban",
+    }
+    climate_label = profile_labels.get(profile, profile.replace("_", " "))
+
+    parts: list[str] = [
+        f"Site context: {location} — {climate_label} climate.",
+    ]
+
+    if profile == "coastal_humid":
+        if any(k in cat for k in ("hvac", "ac", "split", "window", "condenser")):
+            parts.append(
+                "Outdoor HVAC in coastal India often shows faster coil corrosion, cabinet rust, "
+                "and mould in drain paths; resale/as-is value tends to sit below comparable inland units."
+            )
+        elif "generator" in cat or "industrial" in cat:
+            parts.append(
+                "Standby generators near the coast face salt spray and humidity on canopies and exhaust "
+                "metal — buyers typically discount more than for dry-climate installs."
+            )
+        elif "vehicle" in cat or "suv" in cat:
+            parts.append(
+                "Fleet vehicles in coastal cities accumulate underbody rust and paint fade; "
+                "used-market pricing is often softer than in dry NCR/Rajasthan."
+            )
+        else:
+            parts.append(
+                "High humidity increases corrosion and mould risk on metal and enclosed electronics."
+            )
+    elif profile == "dry_hot_dust":
+        parts.append(
+            "Dry heat and dust (typical of NCR, Rajasthan, Gujarat) stress filters, plastics, and paint; "
+            "electromechanical assets may see moderate downward pressure vs moderate-climate peers."
+        )
+    elif profile == "humid_inland":
+        parts.append(
+            "Humid inland conditions (e.g. eastern India) raise mould and condensation wear without constant salt spray."
+        )
+    else:
+        parts.append(
+            "Moderate tier-1/tier-2 climate — location adds less extreme wear than coastal or desert sites."
+        )
+
+    as_is_mid = _money_inr_midpoint(
+        valuation.as_is.inr.min, valuation.as_is.inr.max
+    )
+    like_mid = _money_inr_midpoint(
+        valuation.like_new_reference.inr.min, valuation.like_new_reference.inr.max
+    )
+    if as_is_mid is not None and like_mid is not None and like_mid > 0:
+        gap_pct = max(0.0, (1.0 - as_is_mid / like_mid) * 100.0)
+        if gap_pct >= 5:
+            parts.append(
+                f"The current estimate is about {gap_pct:.0f}% below the like-new reference, "
+                "reflecting photographed condition plus geographic wear typical for this site."
+            )
+        else:
+            parts.append(
+                "The current estimate is close to like-new reference after condition adjustment — "
+                "limited visible wear for this location and asset class."
+            )
+
+    nbv_mid = (
+        _money_inr_midpoint(valuation.nbv.inr.min, valuation.nbv.inr.max)
+        if valuation.nbv
+        else None
+    )
+    if as_is_mid is not None and nbv_mid is not None:
+        if as_is_mid < nbv_mid * 0.9:
+            parts.append(
+                "Market/as-is value appears below ERP book NBV — common when climate and condition "
+                "wear outpace straight-line book depreciation."
+            )
+        elif as_is_mid > nbv_mid * 1.1:
+            parts.append(
+                "Market/as-is value appears above ERP book NBV — asset may be holding value well "
+                "for this geography despite age on books."
+            )
+
+    llm_note = (
+        (llm.valuation_assumptions or "").strip()
+        or (getattr(llm.reasoning, "valuation_deliberation_notes", None) or "").strip()
+        if llm.reasoning
+        else ""
+    )
+    if not llm_note and llm.valuation_inputs and llm.valuation_inputs.valuation_rationale:
+        llm_note = llm.valuation_inputs.valuation_rationale.strip()
+    if llm_note:
+        parts.append(llm_note)
+
+    return " ".join(parts)
+
+
+def build_demo_verification(
+    ctx: DemoContext,
+    llm: LLMAnalysisResult,
+    identifiers: Identifiers,
+) -> DemoVerification:
+    erp_tag = normalize_tag_number(ctx.asset_tag_number)
+    detected_norm = identifiers.asset_tag_number
+    detected_raw = identifiers.asset_tag_number_raw
+
+    if not erp_tag:
+        tag_match = False
+        note = "No ERP tag in input to compare."
+    elif not detected_norm:
+        tag_match = False
+        note = "Tag not detected or unreadable in images."
+    elif detected_norm == erp_tag:
+        tag_match = True
+        note = "Detected tag matches ERP input exactly."
+    else:
+        tag_match = False
+        note = f"Mismatch: ERP {erp_tag} vs detected {detected_norm}."
+
+    vision_make = (llm.brand or "").strip() or None
+    vision_model = (llm.model or "").strip() or None
+    make_match = (
+        _norm_identity(vision_make) == _norm_identity(ctx.make) if ctx.make and vision_make else None
+    )
+    model_match = (
+        _norm_identity(vision_model) == _norm_identity(ctx.model)
+        if ctx.model and vision_model
+        else None
+    )
+
+    return DemoVerification(
+        erp_tag_number=erp_tag,
+        detected_tag_number=detected_norm,
+        detected_tag_number_raw=detected_raw,
+        tag_number_match=tag_match,
+        tag_match_note=note,
+        erp_make=ctx.make or None,
+        erp_model=ctx.model or None,
+        vision_make=vision_make,
+        vision_model=vision_model,
+        make_match=make_match,
+        model_match=model_match,
+    )
 
 
 def apply_demo_book_nbv(
@@ -156,6 +324,7 @@ class DemoAnalysisService:
         identifiers = build_identifiers(
             llm, asset.asset_tag_number, images_analyzed=len(processed)
         )
+        demo_verification = build_demo_verification(demo_context, llm, identifiers)
         confidence = AssetAnalysisService._build_confidence(llm)
 
         fx = await get_usd_to_inr(self.settings)
@@ -176,6 +345,16 @@ class DemoAnalysisService:
         )
         valuation = apply_nbv_comparison(valuation)
 
+        demo_verification = demo_verification.model_copy(
+            update={
+                "location": demo_context.location,
+                "location_profile": infer_location_profile(demo_context.location),
+                "climate_valuation_note": build_climate_valuation_note(
+                    demo_context, valuation, llm
+                ),
+            }
+        )
+
         if valuation.status in (ValuationStatus.WITHHELD, ValuationStatus.INDICATIVE_ONLY):
             VALUATION_WITHHELD.labels(status=valuation.status.value).inc()
 
@@ -195,6 +374,10 @@ class DemoAnalysisService:
             or stickers_need_review(llm)
             or stickers_image_index_need_review(llm.stickers, len(processed))
             or damage_needs_review(llm)
+            or (
+                demo_context.asset_tag_number
+                and not demo_verification.tag_number_match
+            )
         )
         stage_timings["engines_ms"] = int((time.perf_counter() - t2) * 1000)
 
@@ -229,6 +412,7 @@ class DemoAnalysisService:
             confidence=confidence,
             token_usage=usage,
             cost=cost,
+            demo_verification=demo_verification,
         )
 
         logger.info(

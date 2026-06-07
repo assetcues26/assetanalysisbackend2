@@ -233,6 +233,7 @@ def build_demo_verification(
         vision_model=vision_model,
         make_match=make_match,
         model_match=model_match,
+        erp_book_nbv_inr=round(float(ctx.book_nbv_inr), 2),
     )
 
 
@@ -242,19 +243,16 @@ def apply_demo_book_nbv(
     *,
     usd_to_inr: float,
     acquisition_date: date,
-    band_pct: float = 0.05,
 ) -> Valuation:
-    nbv_mid = float(book_nbv_inr)
-    nbv_min = round(nbv_mid * (1 - band_pct), 2)
-    nbv_max = round(nbv_mid * (1 + band_pct), 2)
-    usd_min = round(nbv_min / usd_to_inr, 2) if usd_to_inr else None
-    usd_max = round(nbv_max / usd_to_inr, 2) if usd_to_inr else None
+    """Set NBV to the exact ERP book value (no synthetic depreciation band)."""
+    nbv_inr = round(float(book_nbv_inr), 2)
+    usd = round(nbv_inr / usd_to_inr, 2) if usd_to_inr else None
     valuation.nbv = NbvEstimate(
-        usd=MoneyRange(min=usd_min, max=usd_max),
-        inr=MoneyRange(min=nbv_min, max=nbv_max),
+        usd=MoneyRange(min=usd, max=usd),
+        inr=MoneyRange(min=nbv_inr, max=nbv_inr),
         method="erp_book_nbv",
         age_years_used=_years_since(acquisition_date),
-        disclaimer="Book NBV from ERP demo context (±5% display band).",
+        disclaimer="Book NBV from ERP input — accounting value on the books.",
     )
     return valuation
 

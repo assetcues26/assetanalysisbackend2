@@ -290,6 +290,7 @@ class DemoVerification(BaseModel):
     tag_match_note: Optional[str] = None
     erp_make: Optional[str] = None
     erp_model: Optional[str] = None
+    erp_book_nbv_inr: Optional[float] = None
     vision_make: Optional[str] = None
     vision_model: Optional[str] = None
     make_match: Optional[bool] = None

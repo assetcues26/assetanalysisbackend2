@@ -118,5 +118,6 @@ def test_demo_analyze_success_mocked():
     assert nbv is not None
     assert nbv["method"] == "erp_book_nbv"
     book = ctx["book_nbv_inr"]
-    assert nbv["inr"]["min"] == pytest.approx(book * 0.95, rel=1e-3)
-    assert nbv["inr"]["max"] == pytest.approx(book * 1.05, rel=1e-3)
+    assert nbv["inr"]["min"] == pytest.approx(book, rel=1e-3)
+    assert nbv["inr"]["max"] == pytest.approx(book, rel=1e-3)
+    assert verify["erp_book_nbv_inr"] == pytest.approx(book, rel=1e-3)

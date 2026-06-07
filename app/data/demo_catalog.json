@@ -4,9 +4,9 @@
     "asset_number": "100301912005536",
     "asset_tag_number": "100301912005536",
     "asset_name": "Micromax Split AC",
-    "description": "1.5 ton split air conditioner — indoor wall unit with outdoor R-410A condenser. Installed on 3rd floor admin block, Mumbai plant.",
+    "description": "1.5 ton 3-star split AC (copper condenser) — indoor wall unit with outdoor R-410A condenser. Installed on 3rd floor admin block, Mumbai plant.",
     "make": "Micromax",
-    "model": "IN1630V3Q",
+    "model": "ACS18ED3CS01WHI",
     "category": "HVAC",
     "subcategory": "Split AC",
     "company_code": "1000",
@@ -25,14 +25,19 @@
     "depreciation_method": "SLM",
     "useful_life_years": 15,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 28500
+    "original_cost_inr": 33490,
+    "far_price_basis": "India retail invoice band for Micromax 1.5T 3-star split AC (ACS18ED3CS01WHI class): ₹33,490 on Flipkart per Gadgets360 price tracker (2021-era listings).",
+    "price_reference_urls": [
+      "https://www.gadgets360.com/micromax-1-5-ton-3-star-split-ac-acs18ed3cs01whi-price-in-india-16591",
+      "https://www.gadgets360.com/home-appliances/micromax-1-5-ton-air-conditioners"
+    ]
   },
   {
     "catalog_id": "laptop-002",
     "asset_number": "100301912005537",
     "asset_tag_number": "100301912005537",
     "asset_name": "Dell Latitude 5420 Laptop",
-    "description": "14-inch business laptop (Intel i5, 16 GB RAM, 512 GB SSD). Assigned to regional sales — Bengaluru office.",
+    "description": "14-inch business laptop — Intel Core i5-1135G7, 16 GB DDR4, 512 GB SSD, Windows 10/11 Pro. Assigned to regional sales, Bengaluru.",
     "make": "Dell",
     "model": "Latitude 5420",
     "category": "IT Equipment",
@@ -53,16 +58,21 @@
     "depreciation_method": "SLM",
     "useful_life_years": 5,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 72000
+    "original_cost_inr": 106022,
+    "far_price_basis": "Dell India business store list price ₹1,06,021.97 (GST inclusive) for Latitude 5420; aligned to i5/16 GB/512 GB SSD corporate configuration (Smartprix/Amazon band ₹1,00,000–₹1,06,000 for same spec).",
+    "price_reference_urls": [
+      "https://www.dell.com/en-in/shop/business-laptop-notebook-computers/latitude-5420-business-laptop/spd/latitude-5420-laptop",
+      "https://www.smartprix.com/laptops/dell-latitude-5420-b0b6d3t8zx-laptop-11th-ppd1c575xlol"
+    ]
   },
   {
     "catalog_id": "printer-003",
     "asset_number": "100301912005538",
     "asset_tag_number": "100301912005538",
     "asset_name": "HP LaserJet Pro M404dn",
-    "description": "Monochrome duplex laser printer on 2nd floor shared print room. Network-attached with static IP.",
+    "description": "Monochrome duplex laser printer (W1A53A) on 2nd floor shared print room. Network-attached, 40 ppm, Ethernet.",
     "make": "HP",
-    "model": "LaserJet Pro M404dn",
+    "model": "LaserJet Pro M404dn (W1A53A)",
     "category": "IT Equipment",
     "subcategory": "Printer",
     "company_code": "1000",
@@ -81,16 +91,21 @@
     "depreciation_method": "SLM",
     "useful_life_years": 5,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 24500
+    "original_cost_inr": 38700,
+    "far_price_basis": "B2B India channel band ₹26,000–₹32,000 (IndiaMART/TradeIndia 2020–21) plus GST; capitalized at ₹38,700 mid-point incl. 18% GST vs Printer Point list ₹47,372.",
+    "price_reference_urls": [
+      "https://www.indiamart.com/proddetail/hp-laserjet-pro-m404dn-monochrome-printer-2852975863655.html",
+      "https://printerpoint.co.in/shop/printers/hp-laserjet-pro-m404dn-monochrome-printer-w1a53a/"
+    ]
   },
   {
     "catalog_id": "macbook-004",
     "asset_number": "1000002129",
     "asset_tag_number": "1000002129",
     "asset_name": "Apple Macbook Pro",
-    "description": "Apple MacBook Pro 13-inch (M1, 16 GB / 512 GB) — corporate IT issue for engineering lead. Asset tag with QR on palm rest (CIPLA Goa site).",
+    "description": "Apple MacBook Pro 13-inch (M1, 16 GB / 512 GB SSD) — corporate IT issue for engineering lead. Asset tag with QR on palm rest (CIPLA Goa site).",
     "make": "Apple",
-    "model": "MacBook Pro 13-inch (M1)",
+    "model": "MacBook Pro 13-inch (M1, 16GB/512GB)",
     "category": "IT Assets",
     "subcategory": "Laptop",
     "company_code": "1000",
@@ -109,16 +124,21 @@
     "depreciation_method": "SLM",
     "useful_life_years": 5,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 154900
+    "original_cost_inr": 169900,
+    "far_price_basis": "Apple India CTO band: Smartprix lists M1/16GB/256GB at ₹1,49,900; 512 GB SSD upgrade ~₹20,000 → ₹1,69,900 capitalized (Jan 2022). xcoder.in lists 512 GB/8 GB at ₹1,42,900 excl. tax.",
+    "price_reference_urls": [
+      "https://www.smartprix.com/laptops/apple-macbook-pro-2020-z11b0008x-laptop-apple-ppd17rdqom4j",
+      "https://www.xcoder.co.in/product-page/13-inch-macbook-pro-apple-m1-chip-with-8-core-cpu-and-8-core-gpu"
+    ]
   },
   {
     "catalog_id": "chair-005",
     "asset_number": "100301912005540",
     "asset_tag_number": "100301912005540",
     "asset_name": "Godrej Interio Office Chair",
-    "description": "Ergonomic mesh-back task chair with adjustable lumbar and 5-star nylon base. Open-plan desk 42.",
+    "description": "Godrej Interio Prime high-back mesh ergonomic task chair with adjustable armrests. Open-plan desk 42, Pune corporate office.",
     "make": "Godrej Interio",
-    "model": "Prima Mesh",
+    "model": "Prime High Back Mesh",
     "category": "Furniture",
     "subcategory": "Office Chair",
     "company_code": "1000",
@@ -137,16 +157,21 @@
     "depreciation_method": "SLM",
     "useful_life_years": 10,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 12500
+    "original_cost_inr": 16690,
+    "far_price_basis": "Godrej Interio official store price ₹16,690 for Prime High Back Knitted Fabric ergonomic office chair (mesh back class).",
+    "price_reference_urls": [
+      "https://interio.com/product/prime-high-back-knitted-fabric-ergonomic-office-chair-saddle-brown-prime0015",
+      "https://interio.com/all-products/chairs/work-chairs"
+    ]
   },
   {
     "catalog_id": "display-006",
     "asset_number": "100301912005541",
     "asset_tag_number": "100301912005541",
     "asset_name": "Samsung 55-inch Commercial Display",
-    "description": "55-inch 4K UHD commercial display for lobby digital signage. Wall-mounted with media player.",
+    "description": "Samsung BE55T-H 55-inch Crystal UHD commercial/business TV for lobby digital signage. Wall-mounted with media player.",
     "make": "Samsung",
-    "model": "BE55T-H",
+    "model": "BE55T-H (LH55BETHLG)",
     "category": "IT Equipment",
     "subcategory": "Display",
     "company_code": "1000",
@@ -165,16 +190,21 @@
     "depreciation_method": "SLM",
     "useful_life_years": 5,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 52000
+    "original_cost_inr": 60000,
+    "far_price_basis": "India commercial AV distributor quote ₹60,000/unit for Samsung BE55T-H 55-inch UHD business display (IndiaMART, New Delhi, 3-year warranty class).",
+    "price_reference_urls": [
+      "https://www.indiamart.com/proddetail/samsung-be55t-h-ultra-hd-tv-22939253897.html",
+      "https://www.samsung.com/in/support/model/LH55BETHLGKLXL/"
+    ]
   },
   {
     "catalog_id": "gen-007",
     "asset_number": "100301912005542",
     "asset_tag_number": "100301912005542",
     "asset_name": "Cummins Diesel Generator 62.5 kVA",
-    "description": "62.5 kVA standby diesel generator with acoustic canopy. Plant backup power — Kolkata manufacturing unit.",
+    "description": "62.5 kVA Cummins silent diesel generator set (acoustic canopy) — plant standby power, Kolkata manufacturing unit.",
     "make": "Cummins",
-    "model": "C62D5",
+    "model": "C62.5D5P",
     "category": "Industrial",
     "subcategory": "Generator",
     "company_code": "1000",
@@ -193,14 +223,19 @@
     "depreciation_method": "SLM",
     "useful_life_years": 15,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 385000
+    "original_cost_inr": 565000,
+    "far_price_basis": "India DG set market band ₹5.20–7.27 lakh for Cummins 62.5 kVA (C62.5D5P); capitalized at ₹5.65 lakh for silent canopy industrial install (ExportersIndia/Telangana ₹5.20L, Aajjo silent quotes up to ₹7.27L).",
+    "price_reference_urls": [
+      "https://www.exportersindia.com/product-detail/cummins-power-generator-6583690.htm",
+      "https://www.aajjo.com/product/625-kva-cummins-diesel-generator-3-phase-in-delhi-bnp-enterprises"
+    ]
   },
   {
     "catalog_id": "cooler-009",
     "asset_number": "100301912005544",
     "asset_tag_number": "100301912005544",
     "asset_name": "Blue Star Water Cooler",
-    "description": "Floor-standing bottled water cooler — shopfloor hydration point near packaging line.",
+    "description": "Blue Star BWD3FMRGA floor-standing bottled water dispenser with 14 L bottom refrigerator cabinet. Shopfloor hydration point, Goa plant.",
     "make": "Blue Star",
     "model": "BWD3FMRGA",
     "category": "Appliances",
@@ -221,16 +256,21 @@
     "depreciation_method": "SLM",
     "useful_life_years": 8,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 15800
+    "original_cost_inr": 10059,
+    "far_price_basis": "Moglix India listing ₹10,059 incl. all taxes for Blue Star BWD3FMRGA (hot/cold/normal + refrigerator). Amazon/Flipkart band ₹9,303–₹9,599.",
+    "price_reference_urls": [
+      "https://www.moglix.com/blue-star-bwd3fmrga-3-5lph-water-dispenser-with-refrigerator/mp/msn2r2440ilcm9",
+      "https://www.amazon.in/dp/B00V679BEC"
+    ]
   },
   {
     "catalog_id": "vehicle-010",
     "asset_number": "100301912005545",
     "asset_tag_number": "100301912005545",
     "asset_name": "Tata Nexon Fleet Vehicle",
-    "description": "Tata Nexon XZ+ compact SUV — regional sales fleet vehicle. Registered RJ-14-AB-4821.",
+    "description": "Tata Nexon XZ+ petrol (1.2 Revotron, manual) — regional sales fleet SUV. Registered RJ-14-AB-4821, Jaipur hub.",
     "make": "Tata",
-    "model": "Nexon XZ+",
+    "model": "Nexon XZ+ Petrol",
     "category": "Vehicle",
     "subcategory": "SUV",
     "company_code": "1000",
@@ -249,6 +289,11 @@
     "depreciation_method": "SLM",
     "useful_life_years": 8,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 985000
+    "original_cost_inr": 1250000,
+    "far_price_basis": "On-road capitalized cost for Tata Nexon [2020–23] XZ Plus petrol: Carwale/CarTrade band ₹12.50–12.85 lakh on-road (2021); Jaipur diesel XZ+ reference ₹12.10L (vicky.in). Fleet petrol XZ+ rounded to ₹12.50 lakh.",
+    "price_reference_urls": [
+      "https://www.carwale.com/tata-cars/nexon-2020-2023/xz-plus/",
+      "https://www.vicky.in/car/tata/nexon/on-road-price-in-jaipur/"
+    ]
   }
 ]

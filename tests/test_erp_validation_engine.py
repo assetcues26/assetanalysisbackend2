@@ -30,8 +30,8 @@ def _ctx(**overrides):
         category="HVAC",
         subcategory="Split AC",
         acquisition_date=date(2021, 6, 15),
-        original_cost_inr=28500,
-        book_nbv_inr=19516,
+        original_cost_inr=33490,
+        book_nbv_inr=22933,
         location="Mumbai, Maharashtra",
         asset_tag_number="100301912005536",
     )

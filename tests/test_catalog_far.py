@@ -14,12 +14,12 @@ from app.services.catalog_far import (
 from app.services.demo_catalog import load_demo_catalog
 
 
-def test_macbook_nbv_mid_life_with_realistic_cost():
-    """2022 M1 MacBook Pro India corporate cost — partial SLM after ~4.4 years."""
-    far = compute_slm_far(154900, date(2022, 1, 14), 5.0, as_of=FAR_AS_OF_DATE)
-    assert far["book_nbv_inr"] == 25573
-    assert far["residual_value_inr"] == 7745.0
-    assert far["accumulated_depreciation_inr"] == 129327
+def test_macbook_nbv_mid_life_with_researched_cost():
+    """2022 M1 MacBook Pro 16GB/512GB — Smartprix/Apple India price band, partial SLM."""
+    far = compute_slm_far(169900, date(2022, 1, 14), 5.0, as_of=FAR_AS_OF_DATE)
+    assert far["book_nbv_inr"] == 28049
+    assert far["residual_value_inr"] == 8495.0
+    assert far["accumulated_depreciation_inr"] == 141851
     assert far["asset_age_years"] < 5
 
 
@@ -42,12 +42,12 @@ def test_enrich_catalog_item_computes_nbv():
             "catalog_id": "ac-001",
             "subcategory": "Split AC",
             "acquisition_date": "2021-06-15",
-            "original_cost_inr": 28500,
+            "original_cost_inr": 33490,
             "useful_life_years": 15,
         }
     )
-    assert item["book_nbv_inr"] == 19516
-    assert item["accumulated_depreciation_inr"] == 8984
+    assert item["book_nbv_inr"] == 22933
+    assert item["accumulated_depreciation_inr"] == 10557
     assert item["depreciation_method"] == "SLM"
 
 
@@ -56,8 +56,10 @@ def test_load_demo_catalog_enriched():
     catalog = load_demo_catalog()
     assert len(catalog) == 9
     macbook = next(a for a in catalog if a["catalog_id"] == "macbook-004")
-    assert macbook["book_nbv_inr"] == 25573
-    assert macbook["original_cost_inr"] == 154900
+    assert macbook["book_nbv_inr"] == 28049
+    assert macbook["original_cost_inr"] == 169900
+    assert macbook.get("far_price_basis")
+    assert macbook.get("price_reference_urls")
     assert macbook["asset_number"] == "1000002129"
     for row in catalog:
         assert row["book_nbv_inr"] <= row["original_cost_inr"]

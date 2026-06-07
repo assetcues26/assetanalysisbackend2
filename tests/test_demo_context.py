@@ -18,13 +18,13 @@ def test_demo_context_valid():
         category="HVAC",
         subcategory="Split AC",
         acquisition_date=date(2021, 6, 15),
-        original_cost_inr=28500,
-        book_nbv_inr=19516.0,
+        original_cost_inr=33490,
+        book_nbv_inr=22933.0,
         location="Mumbai, Maharashtra",
         asset_tag_number="100301912005536",
     )
     assert ctx.catalog_id == "ac-001"
-    assert ctx.book_nbv_inr == 19516
+    assert ctx.book_nbv_inr == 22933
 
 
 def test_demo_context_requires_name_and_location():
@@ -67,8 +67,8 @@ def test_build_demo_verification_tag_match():
         category="HVAC",
         subcategory="Split AC",
         acquisition_date=date(2021, 6, 15),
-        original_cost_inr=28500,
-        book_nbv_inr=19516.0,
+        original_cost_inr=33490,
+        book_nbv_inr=22933.0,
         location="Mumbai, Maharashtra",
         asset_tag_number="100301912005536",
     )

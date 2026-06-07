@@ -121,3 +121,51 @@ def test_demo_analyze_success_mocked():
     assert nbv["inr"]["min"] == pytest.approx(book, rel=1e-3)
     assert nbv["inr"]["max"] == pytest.approx(book, rel=1e-3)
     assert verify["erp_book_nbv_inr"] == pytest.approx(book, rel=1e-3)
+
+
+def test_demo_analyze_allows_up_to_max_images_not_latency_cap():
+    """V6 should allow MAX_IMAGES (10), not the v1 latency cap (6)."""
+    settings = Settings(gemini_api_key="fake-key", max_images=10, max_images_latency_mode=6)
+    ctx = _demo_context_payload()
+
+    with patch("app.api.v6.demo.get_settings", return_value=settings):
+        client = TestClient(create_app())
+        imgs = [make_test_image((i * 10, 70, 110)) for i in range(7)]
+        files = [("images", (f"img{i}.jpg", img, "image/jpeg")) for i, img in enumerate(imgs)]
+        with patch(
+            "app.services.gemini_v6_demo.GeminiV6DemoService.analyze_images_with_context",
+            new=AsyncMock(return_value=(_mock_llm(), TokenUsage())),
+        ):
+            with patch(
+                "app.services.demo_analyzer.get_usd_to_inr",
+                new=AsyncMock(
+                    return_value=FxResult(
+                        rate=95.0, source="fixed_rate", is_fallback=False, as_of=None
+                    )
+                ),
+            ):
+                response = client.post(
+                    "/v6/demo/analyze/multi",
+                    files=files,
+                    data={"demo_context": json.dumps(ctx), "locale": "en-IN"},
+                )
+
+    assert response.status_code == 200, response.text
+
+
+def test_demo_analyze_rejects_over_max_images():
+    settings = Settings(gemini_api_key="fake-key", max_images=10)
+    ctx = _demo_context_payload()
+
+    with patch("app.api.v6.demo.get_settings", return_value=settings):
+        client = TestClient(create_app())
+        imgs = [make_test_image((i * 5, 70, 110)) for i in range(11)]
+        files = [("images", (f"img{i}.jpg", img, "image/jpeg")) for i, img in enumerate(imgs)]
+        response = client.post(
+            "/v6/demo/analyze/multi",
+            files=files,
+            data={"demo_context": json.dumps(ctx), "locale": "en-IN"},
+        )
+
+    assert response.status_code == 400
+    assert "At most 10 images allowed" in response.json()["detail"]

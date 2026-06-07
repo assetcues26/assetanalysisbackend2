@@ -76,11 +76,11 @@ async def analyze_demo_multi(
     real_count = len(
         [img for img in (images or []) if img is not None and (img.filename or img.content_type)]
     )
-    if real_count > settings.max_images_latency_mode:
+    if real_count > settings.max_images:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                f"At most {settings.max_images_latency_mode} images allowed "
+                f"At most {settings.max_images} images allowed "
                 f"(got {real_count})."
             ),
         )

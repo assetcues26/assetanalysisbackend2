@@ -149,6 +149,198 @@
       ]
     },
     {
+      "catalog_id": "rack-011",
+      "asset_name": "Pallet Rack Upright Column",
+      "acquisition_date": "2021-08-10",
+      "asset_age_years": 4.83,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "New warehouse pallet racking upright — pristine powder coat",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Selective_pallet_rack.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Selective_pallet_rack.jpg"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "base_closeup",
+          "description": "Rack upright base plate — minor scuff, structurally sound",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/oMpAz-DN-9I/download?force=true",
+          "page_url": "https://unsplash.com/photos/warehouse-shelving-oMpAz-DN-9I"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "full_asset",
+          "description": "Warehouse racking upright in active use — routine wear",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/TNlHf4m4gpI/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-large-warehouse-with-lots-of-shelving-TNlHf4m4gpI"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "base_closeup",
+          "description": "Rack upright with paint chipping and light corrosion at base",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/UBhpOIHnazM/download?force=true",
+          "page_url": "https://unsplash.com/photos/brown-wooden-shelves-in-a-room-UBhpOIHnazM"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "base_closeup",
+          "description": "Actual asset photo — severe corrosion, heavy paint loss and rust at base; forklift impact marks on lower column body",
+          "license": "Proprietary (internal inspection photo)",
+          "download_url": "local://rack-011-damaged-base.jpg",
+          "page_url": "internal"
+        }
+      ]
+    },
+    {
+      "catalog_id": "rack-012",
+      "asset_name": "Material Storage A-Frame Rack",
+      "acquisition_date": "2021-04-15",
+      "asset_age_years": 5.14,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "New A-frame long-material storage rack — factory finish",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Selective_pallet_rack.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Selective_pallet_rack.jpg"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "full_asset",
+          "description": "A-frame rack frame in warehouse aisle — light use",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/oMpAz-DN-9I/download?force=true",
+          "page_url": "https://unsplash.com/photos/warehouse-shelving-oMpAz-DN-9I"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "full_asset",
+          "description": "Industrial storage frame — average 5-year warehouse use",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/TNlHf4m4gpI/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-large-warehouse-with-lots-of-shelving-TNlHf4m4gpI"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "base_closeup",
+          "description": "Frame base with paint flaking and surface rust — fair condition",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/UBhpOIHnazM/download?force=true",
+          "page_url": "https://unsplash.com/photos/brown-wooden-shelves-in-a-room-UBhpOIHnazM"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "full_asset",
+          "description": "Actual asset photo — green A-frame rack with extensive paint peeling; floor anchor plates visible; frame distorted under load",
+          "license": "Proprietary (internal inspection photo)",
+          "download_url": "local://rack-012-damaged-frame.jpg",
+          "page_url": "internal"
+        }
+      ]
+    },
+    {
+      "catalog_id": "rack-013",
+      "asset_name": "Pallet Rack Load Beam — Step Profile",
+      "acquisition_date": "2021-09-20",
+      "asset_age_years": 4.71,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "beam_end",
+          "description": "New orange step beam installed on green upright — pristine",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Selective_pallet_rack.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Selective_pallet_rack.jpg"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "full_asset",
+          "description": "Orange rack beam carrying wire deck — good operational state",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/oMpAz-DN-9I/download?force=true",
+          "page_url": "https://unsplash.com/photos/warehouse-shelving-oMpAz-DN-9I"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "full_asset",
+          "description": "Rack beam under pallet load — normal 5yr surface wear",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/TNlHf4m4gpI/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-large-warehouse-with-lots-of-shelving-TNlHf4m4gpI"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "beam_end",
+          "description": "Beam end connector with surface corrosion — fair",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/UBhpOIHnazM/download?force=true",
+          "page_url": "https://unsplash.com/photos/brown-wooden-shelves-in-a-room-UBhpOIHnazM"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "beam_end",
+          "description": "Actual asset photo — severe buckle/dent at left hook-end connector from forklift impact; cracked paint; structural integrity compromised",
+          "license": "Proprietary (internal inspection photo)",
+          "download_url": "local://rack-013-damaged-beam.jpg",
+          "page_url": "internal"
+        }
+      ]
+    },
+    {
+      "catalog_id": "rack-014",
+      "asset_name": "Pallet Rack Load Beam — Box Profile",
+      "acquisition_date": "2021-09-20",
+      "asset_age_years": 4.71,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "New orange box beam with wire deck — pristine installation",
+          "license": "CC BY-SA 4.0 (Wikimedia)",
+          "download_url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Selective_pallet_rack.jpg",
+          "page_url": "https://commons.wikimedia.org/wiki/File:Selective_pallet_rack.jpg"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "full_asset",
+          "description": "Box beam under wrapped pallet load — good operating condition",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/oMpAz-DN-9I/download?force=true",
+          "page_url": "https://unsplash.com/photos/warehouse-shelving-oMpAz-DN-9I"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "full_asset",
+          "description": "Rack beam in heavy-use bay — average 5yr warehouse wear",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/TNlHf4m4gpI/download?force=true",
+          "page_url": "https://unsplash.com/photos/a-large-warehouse-with-lots-of-shelving-TNlHf4m4gpI"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "mid_span",
+          "description": "Beam mid-span with slight deflection — fair load history",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/UBhpOIHnazM/download?force=true",
+          "page_url": "https://unsplash.com/photos/brown-wooden-shelves-in-a-room-UBhpOIHnazM"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "mid_span",
+          "description": "Actual asset photo — visible mid-span bowing/deflection; wrap-around pallet visible; beam below safe load limit",
+          "license": "Proprietary (internal inspection photo)",
+          "download_url": "local://rack-014-damaged-beam.jpg",
+          "page_url": "internal"
+        }
+      ]
+    },
+    {
       "catalog_id": "gen-007",
       "asset_name": "Cummins 62.5 kVA C62.5D5P",
       "acquisition_date": "2021-09-12",

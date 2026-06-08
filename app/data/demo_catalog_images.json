@@ -245,54 +245,6 @@
       ]
     },
     {
-      "catalog_id": "cooler-009",
-      "asset_name": "Blue Star BWD3FMRGA Water Dispenser",
-      "acquisition_date": "2021-05-30",
-      "asset_age_years": 4.94,
-      "images": [
-        {
-          "condition": "best",
-          "angle_hint": "full_asset",
-          "description": "Office water dispenser with bottle — excellent",
-          "license": "Unsplash License",
-          "download_url": "https://unsplash.com/photos/sTwRC4kLtOs/download?force=true",
-          "page_url": "https://unsplash.com/photos/a-glass-water-dispenser-and-drinking-glasses-sTwRC4kLtOs"
-        },
-        {
-          "condition": "good",
-          "angle_hint": "full_asset",
-          "description": "Water cooler in professional office",
-          "license": "FreeImages Content License",
-          "download_url": "https://www.freeimages.com/photo/businesswoman-standing-by-water-cooler-with-lcd-monitors-2097614",
-          "page_url": "https://www.freeimages.com/photo/businesswoman-standing-by-water-cooler-with-lcd-monitors-2097614"
-        },
-        {
-          "condition": "average",
-          "angle_hint": "full_asset",
-          "description": "Standard office water cooler — average ~5yr unit",
-          "license": "Unsplash License (illustration)",
-          "download_url": "https://unsplash.com/illustrations/Met_Jbm6Qvw/download?force=true",
-          "page_url": "https://unsplash.com/illustrations/green-water-cooler-with-blue-water-bottle-Met_Jbm6Qvw"
-        },
-        {
-          "condition": "fair",
-          "angle_hint": "outdoor_unit",
-          "description": "Old outdoor-adjacent appliance wear (proxy for aged cooler housing)",
-          "license": "Pakutaso free",
-          "download_url": "https://www.pakutaso.com/en/20260433113post-57132.html",
-          "page_url": "https://www.pakutaso.com/en/20260433113post-57132.html"
-        },
-        {
-          "condition": "damaged",
-          "angle_hint": "full_asset",
-          "description": "Rusty aged appliance — damaged/leaking scenario proxy",
-          "license": "Unsplash License",
-          "download_url": "https://unsplash.com/photos/Y4VXRTt9lAc/download?force=true",
-          "page_url": "https://unsplash.com/photos/a-rusty-air-conditioner-sitting-on-top-of-a-wall-Y4VXRTt9lAc"
-        }
-      ]
-    },
-    {
       "catalog_id": "vehicle-010",
       "asset_name": "Tata Nexon XZ+ Petrol",
       "acquisition_date": "2021-02-14",

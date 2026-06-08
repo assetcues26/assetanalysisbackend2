@@ -149,6 +149,54 @@
       ]
     },
     {
+      "catalog_id": "laptop-015",
+      "asset_name": "HP 15-bs146tu Laptop",
+      "acquisition_date": "2022-05-10",
+      "asset_age_years": 4.08,
+      "images": [
+        {
+          "condition": "best",
+          "angle_hint": "full_asset",
+          "description": "HP 15 laptop open on desk — clean/near-new state reference",
+          "license": "Pexels License",
+          "download_url": "https://www.pexels.com/photo/8284722/download/",
+          "page_url": "https://www.pexels.com/photo/black-and-silver-laptop-computer-8284722/"
+        },
+        {
+          "condition": "good",
+          "angle_hint": "full_asset",
+          "description": "HP laptop in office use — light surface marks, good working order",
+          "license": "Pexels License",
+          "download_url": "https://www.pexels.com/photo/3197390/download/",
+          "page_url": "https://www.pexels.com/photo/man-using-dell-laptop-3197390/"
+        },
+        {
+          "condition": "average",
+          "angle_hint": "full_asset",
+          "description": "Laptop workspace — average daily carry wear after ~3 years",
+          "license": "Unsplash License",
+          "download_url": "https://unsplash.com/photos/ms-QnzmKGVM/download?force=true",
+          "page_url": "https://unsplash.com/photos/turned-on-macbook-pro-on-desk-ms-QnzmKGVM"
+        },
+        {
+          "condition": "fair",
+          "angle_hint": "full_asset",
+          "description": "Actual asset photo (open view) — HP 15 laptop with heavy keyboard/lid wear, screen functional, significant cosmetic deterioration",
+          "license": "Proprietary (internal inspection photo)",
+          "download_url": "local://laptop-015-fair-open.jpg",
+          "page_url": "internal"
+        },
+        {
+          "condition": "damaged",
+          "angle_hint": "lid_and_base",
+          "description": "Actual asset photos (lid + base views) — heavily scratched/dirty lid, worn chassis underside with service tag visible; approaching end of useful life",
+          "license": "Proprietary (internal inspection photo)",
+          "download_url": "local://laptop-015-damaged-lid-base.jpg",
+          "page_url": "internal"
+        }
+      ]
+    },
+    {
       "catalog_id": "rack-012",
       "asset_name": "Material Storage A-Frame Rack",
       "acquisition_date": "2021-04-15",

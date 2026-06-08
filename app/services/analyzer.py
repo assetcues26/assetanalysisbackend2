@@ -232,12 +232,15 @@ class AssetAnalysisService:
                 counts.severe += 1
 
         score = llm.condition_score
-        if isinstance(score, int):
-            if 1 <= score <= 10:
-                score = score * 10
-            score = max(0, min(100, score))
-        else:
-            score = None
+        if score is not None:
+            if isinstance(score, float):
+                score = int(round(score))
+            if isinstance(score, int):
+                if 1 <= score <= 10:
+                    score = score * 10
+                score = max(0, min(100, score))
+            else:
+                score = None
 
         return ConditionReport(
             grade=llm.condition_grade,

@@ -1,7 +1,7 @@
 {
   "generated_on": "2026-06-07",
   "valuation_date": "2026-06-07",
-  "notes": "Free-use stock images matched to catalog asset type and ~4–5 year office/plant age (acquired 2021–2022). Mix of best/good/average/fair/damaged per asset for V6 demo uploads. Prefer direct download URLs; Wikimedia CC BY-SA may require attribution.",
+  "notes": "Free-use stock images matched to catalog asset type and age (acquired 2021–2025). Mix of best/good/average/fair/damaged per asset for V6 demo uploads. Prefer direct download URLs; Wikimedia CC BY-SA may require attribution.",
   "condition_scale": ["best", "good", "average", "fair", "damaged"],
   "assets": [
     {
@@ -102,9 +102,9 @@
     },
     {
       "catalog_id": "macbook-004",
-      "asset_name": "Apple MacBook Pro 13\" M1",
+      "asset_name": "Apple Macbook Pro",
       "acquisition_date": "2022-01-14",
-      "asset_age_years": 4.4,
+      "asset_age_years": 4.39,
       "images": [
         {
           "condition": "best",
@@ -141,7 +141,7 @@
         {
           "condition": "damaged",
           "angle_hint": "tag_closeup",
-          "description": "Use your real tagged MacBook photo (tag 1000002129) for ERP tag-match demos; stock fallback below",
+          "description": "Use your real tagged MacBook photo (tag 10000052) for ERP tag-match demos; stock fallback below",
           "license": "Unsplash License",
           "download_url": "https://unsplash.com/photos/SMHx_spBYx0/download?force=true",
           "page_url": "https://unsplash.com/photos/a-broken-laptop-computer-sitting-on-top-of-a-table-SMHx_spBYx0"
@@ -150,7 +150,7 @@
     },
     {
       "catalog_id": "laptop-015",
-      "asset_name": "HP 15-bs146tu Laptop",
+      "asset_name": "HP 15 Laptop",
       "acquisition_date": "2022-05-10",
       "asset_age_years": 4.08,
       "images": [
@@ -269,7 +269,7 @@
         {
           "condition": "average",
           "angle_hint": "front_view",
-          "description": "2018 Tata Nexon XM — average ~5yr company car",
+          "description": "Tata Nexon XM — reference stock for condition comparison",
           "license": "CC BY-SA 4.0 (Wikimedia)",
           "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/88/2018_Tata_Nexon_XM.jpg",
           "page_url": "https://commons.wikimedia.org/wiki/File:2018_Tata_Nexon_XM.jpg"
@@ -287,8 +287,8 @@
           "angle_hint": "rear_view",
           "description": "Heavy scratch damage on SUV rear panel",
           "license": "Unsplash License",
-          "download_url": "https://unsplash.com/photos/F_EZo6Rr_bE/download?force=true",
-          "page_url": "https://unsplash.com/photos/damaged-grey-car-fender-with-cracked-paint-F_EZo6Rr_bE"
+          "download_url": "https://unsplash.com/photos/3wylDrjxH-E/download?force=true",
+          "page_url": "https://unsplash.com/photos/white-car-with-rear-collision-damage-3wylDrjxH-E"
         }
       ]
     }

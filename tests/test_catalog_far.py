@@ -54,13 +54,13 @@ def test_enrich_catalog_item_computes_nbv():
 def test_load_demo_catalog_enriched():
     load_demo_catalog.cache_clear()
     catalog = load_demo_catalog()
-    assert len(catalog) == 9
+    assert len(catalog) == 6
     macbook = next(a for a in catalog if a["catalog_id"] == "macbook-004")
     assert macbook["book_nbv_inr"] == 28049
     assert macbook["original_cost_inr"] == 169900
     assert macbook.get("far_price_basis")
     assert macbook.get("price_reference_urls")
-    assert macbook["asset_number"] == "1000002129"
+    assert macbook["asset_number"] == "10000052"
     for row in catalog:
         assert row["book_nbv_inr"] <= row["original_cost_inr"]
         assert row["accumulated_depreciation_inr"] >= 0

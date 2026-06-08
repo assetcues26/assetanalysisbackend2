@@ -90,7 +90,7 @@ REPAIR TOLERANCE BY CLASS (each damage_items[] row):
 
 Each damage_items[]: location, type, severity (minor|moderate|severe), seen_in_image, detail, affects_function, repair_action, repair_needed, repair_urgency, acceptable_wear.
 Weight rust/corrosion types heavily for coastal_humid outdoor metal assets.
-condition_summary, condition_grade, condition_score, cosmetic_condition, structural_condition, functional_status, cleanliness, wear_level, usability, repair_recommendation, estimated_remaining_life, missing_parts[], functional_issues[], positive_aspects[].
+condition_summary, condition_grade (word: Excellent|Good|Fair|Poor|Bad), condition_score (1-10 integer scale; 10=perfect, 1=severely damaged), cosmetic_condition, structural_condition, functional_status, cleanliness, wear_level, usability, repair_recommendation, estimated_remaining_life, missing_parts[], functional_issues[], positive_aspects[].
 
 === STEP 5 — VALUATION INPUTS ONLY ===
 Fill valuation_inputs — do NOT output final FMV dollar fields:

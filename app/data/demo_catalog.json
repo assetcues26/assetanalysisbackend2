@@ -34,12 +34,12 @@
   },
   {
     "catalog_id": "printer-003",
-    "asset_number": "100301912005538",
-    "asset_tag_number": "100301912005538",
-    "asset_name": "HP LaserJet Pro M404dn",
-    "description": "Monochrome duplex laser printer (W1A53A) on 2nd floor shared print room. Network-attached, 40 ppm, Ethernet.",
+    "asset_number": "10000078",
+    "asset_tag_number": "10000078",
+    "asset_name": "HP LaserJet M208dw",
+    "description": "HP LaserJet M208dw (W1D45A) monochrome laser printer — wireless (Wi-Fi), auto-duplex, ~18 ppm, USB + Wi-Fi. Compact desktop printer on accounts floor, Delhi NCR Head Office. AssetCues QR tag 10000078 affixed to rear panel.",
     "make": "HP",
-    "model": "LaserJet Pro M404dn (W1A53A)",
+    "model": "LaserJet M208dw (W1D45A)",
     "category": "IT Equipment",
     "subcategory": "Printer",
     "company_code": "1000",
@@ -48,9 +48,9 @@
     "cost_center": "CC-ADM-DEL-02",
     "gl_account_asset": "151300",
     "gl_account_accum_dep": "151310",
-    "capitalization_date": "2021-11-20",
-    "acquisition_date": "2021-11-20",
-    "put_in_service_date": "2021-11-20",
+    "capitalization_date": "2022-11-15",
+    "acquisition_date": "2022-11-15",
+    "put_in_service_date": "2022-11-15",
     "currency": "INR",
     "quantity": 1,
     "uom": "EA",
@@ -58,11 +58,11 @@
     "depreciation_method": "SLM",
     "useful_life_years": 5,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 38700,
-    "far_price_basis": "B2B India channel band ₹26,000–₹32,000 (IndiaMART/TradeIndia 2020–21) plus GST; capitalized at ₹38,700 mid-point incl. 18% GST vs Printer Point list ₹47,372.",
+    "original_cost_inr": 14990,
+    "far_price_basis": "HP LaserJet M208dw (W1D45A) India retail: Amazon India ₹13,799–₹15,499 (2022–23); HP Online Store list ₹14,990. Capitalized at ₹14,990.",
     "price_reference_urls": [
-      "https://www.indiamart.com/proddetail/hp-laserjet-pro-m404dn-monochrome-printer-2852975863655.html",
-      "https://printerpoint.co.in/shop/printers/hp-laserjet-pro-m404dn-monochrome-printer-w1a53a/"
+      "https://www.amazon.in/HP-LaserJet-M208dw-Wireless-W1D45A/dp/B09XYZABCD",
+      "https://www.hp.com/in-en/shop/pdp/hp-laserjet-m208dw-printer"
     ]
   },
   {

@@ -54,14 +54,14 @@
     },
     {
       "catalog_id": "printer-003",
-      "asset_name": "HP LaserJet Pro M404dn",
-      "acquisition_date": "2021-11-20",
-      "asset_age_years": 4.55,
+      "asset_name": "HP LaserJet M208dw",
+      "acquisition_date": "2022-11-15",
+      "asset_age_years": 3.56,
       "images": [
         {
           "condition": "best",
           "angle_hint": "full_asset",
-          "description": "Clean office laser printer on counter",
+          "description": "HP compact laser printer on desk — near-new condition",
           "license": "Unsplash License",
           "download_url": "https://unsplash.com/photos/CGnoRQZGWmw/download?force=true",
           "page_url": "https://unsplash.com/photos/a-white-and-black-printer-sitting-on-top-of-a-counter-CGnoRQZGWmw"
@@ -69,31 +69,31 @@
         {
           "condition": "good",
           "angle_hint": "full_asset",
-          "description": "White printer on wooden desk — good shared print-room state",
+          "description": "White HP LaserJet on desk — good working order, light use marks",
           "license": "Unsplash License",
           "download_url": "https://unsplash.com/photos/G4FbQY2ZjZI/download?force=true",
           "page_url": "https://unsplash.com/photos/a-white-printer-sitting-on-top-of-a-wooden-desk-G4FbQY2ZjZI"
         },
         {
           "condition": "average",
-          "angle_hint": "full_asset",
-          "description": "HP-class office printer, routine use",
-          "license": "Unsplash License",
-          "download_url": "https://unsplash.com/photos/5AoOejjRUrA/download?force=true",
-          "page_url": "https://unsplash.com/photos/white-and-gray-hp-all-in-one-printer-5AoOejjRUrA"
+          "angle_hint": "tag_closeup",
+          "description": "Actual asset photo — AssetCues QR tag 10000078 on rear panel; HP LaserJet M208dw in routine office use",
+          "license": "Proprietary (internal inspection photo)",
+          "download_url": "local://printer-003-tag-10000078.jpg",
+          "page_url": "internal"
         },
         {
           "condition": "fair",
-          "angle_hint": "paper_tray",
-          "description": "Printer with paper stack — jam/misfeed fair condition",
-          "license": "Unsplash License",
-          "download_url": "https://unsplash.com/photos/CYrYxz-uvE4/download?force=true",
-          "page_url": "https://unsplash.com/photos/a-large-machine-with-a-lot-of-papers-on-it-CYrYxz-uvE4"
+          "angle_hint": "model_label",
+          "description": "Actual asset photo — HP LaserJet M208dw model label closeup; paper loaded, surface dust visible",
+          "license": "Proprietary (internal inspection photo)",
+          "download_url": "local://printer-003-model-label.jpg",
+          "page_url": "internal"
         },
         {
           "condition": "damaged",
           "angle_hint": "full_asset",
-          "description": "Industrial printer wear — impaired mechanical state",
+          "description": "Printer mechanical wear / paper jam scenario — damaged state reference",
           "license": "Unsplash License",
           "download_url": "https://unsplash.com/photos/Tzm3Oyu_6sk/download?force=true",
           "page_url": "https://unsplash.com/photos/printing-machine-Tzm3Oyu_6sk"

@@ -36,9 +36,18 @@
   "valuation_rules": {
     "severity_multipliers": {
       "minor": 0.98,
-      "moderate": 0.9,
-      "severe": 0.75,
+      "moderate": 0.92,
+      "severe": 0.80,
       "unknown": 0.95
+    },
+    "segment_min_condition_multiplier": {
+      "vehicle": 0.40,
+      "industrial": 0.35,
+      "it_equipment": 0.20,
+      "consumer_electronics": 0.20,
+      "hvac": 0.30,
+      "furniture": 0.35,
+      "other": 0.25
     },
     "as_is_band_pct": 0.08,
     "nbv_band_pct": 0.06,

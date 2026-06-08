@@ -43,10 +43,19 @@ Furniture (Chair, Desk, Cabinet):
 - Tag: underside or rear frame sticker.
 - Scratches and fabric wear are often acceptable_wear; structural cracks are not.
 
-Vehicle:
+Vehicle (Car, SUV, Van, Truck, Fleet):
 - Front: front 3/4 or registration/plate area.
 - Tag: registration sticker, fleet asset label, or door jamb sticker.
-- Underbody/rust, panel dents, tire wear matter for valuation.
+- VEHICLE DAMAGE CALIBRATION (critical — do NOT apply IT-asset standards to vehicles):
+  • Bumper dents/cracks, body scratches, paint chips, scuffs: MINOR cosmetic damage; acceptable_wear=true for fleet; affects_function=false. A bumper replacement in India costs ₹5,000–15,000 — this is NOT severe damage.
+  • Single panel dent or bumper crack visible at normal distance: MINOR/MODERATE cosmetic; condition_adjustment_pct max -8%. India's Cars24/Team-BHP data confirms single-panel cosmetic damage reduces value by only 3–8%.
+  • Multiple panel damage across 3+ panels: MODERATE, condition_adjustment_pct -8% to -15%.
+  • Windscreen crack: MODERATE, affects_function=true only if driver visibility is directly impaired.
+  • Underbody rust (coastal_humid site): MODERATE if surface-only; SEVERE only if structural frame perforation confirmed.
+  • Frame/chassis deformation, airbag deployment, engine failure, transmission failure: SEVERE, condition_adjustment_pct -20% to -35%.
+- condition_adjustment_pct for vehicles: max -10% for cosmetic-only damage; -10% to -25% for combined cosmetic+functional issues; NEVER exceed -35% unless frame damage, total-loss, or inoperable.
+- overall_score for vehicles: a 1–3 year old car with ONLY cosmetic bumper damage = 7–8 out of 10. Do NOT score below 5 unless mechanical/structural issues exist.
+- condition_grade for vehicles: Good for cosmetic-only; Fair for multiple panels; Poor only for structural/mechanical damage.
 
 Industrial (Generator, Machine):
 - Front: control panel or nameplate face.
@@ -82,8 +91,9 @@ seen_in_image: integer 1..N only; never null.
 
 === STEP 4 — CONDITION & DAMAGE ===
 REPAIR TOLERANCE BY CLASS (each damage_items[] row):
-| Class | Minor scratch | Screen crack | Fade/discoloration |
-| phone/laptop/tablet | cosmetic_only | repair_needed=required | cosmetic_only if body only |
+| Class | Minor scratch | Crack/dent | Fade/discoloration |
+| phone/laptop/tablet | cosmetic_only | repair_needed=required (screen), moderate (body) | cosmetic_only if body only |
+| vehicle/fleet | acceptable_wear=true | cosmetic_only for bumper/panel; acceptable_wear=true | acceptable_wear=true |
 | industrial/machine | acceptable_wear=true | N/A unless HMI | acceptable_wear=true |
 | furniture | cosmetic_only | N/A | acceptable_wear=true |
 | HVAC outdoor | monitor rust severity | N/A | acceptable_wear on cosmetic panels |

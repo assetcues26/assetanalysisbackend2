@@ -18,6 +18,13 @@ from app.services.identity_validator import IdentityValidationResult
 from app.services.reference_data import load_reference_data, valuation_rules
 
 
+def resolve_segment_for_asset(llm: LLMAnalysisResult, settings: Settings | None = None) -> str:
+    """Public convenience wrapper — resolves segment without requiring a pre-loaded data dict."""
+    settings = settings or get_settings()
+    data = load_reference_data(settings)
+    return _resolve_segment(llm, data)
+
+
 def _resolve_segment(llm: LLMAnalysisResult, data: dict) -> str:
     seg = (llm.valuation_inputs.market_segment or "").strip().lower() if llm.valuation_inputs else ""
     if seg in {s.value for s in MarketSegment}:
@@ -48,24 +55,65 @@ def _reference_like_new_usd(llm: LLMAnalysisResult, data: dict, segment: str, ru
     return float(baseline["min"]), float(baseline["max"])
 
 
-def _condition_multiplier(condition: ConditionReport, llm: LLMAnalysisResult, rules: dict) -> float:
+def _cap_condition_adjustment(adj_pct: float, segment: str) -> float:
+    """Clamp condition_adjustment_pct to segment-specific max deduction.
+
+    Research basis (India market):
+      vehicle      — cosmetic-only max -15%; structural max -35%
+      industrial   — severe functional max -40%
+      it_equipment — screen crack / severe max -55%
+      other        — conservative -50%
+    """
+    floors = {
+        "vehicle": -35.0,
+        "industrial": -40.0,
+        "it_equipment": -55.0,
+        "consumer_electronics": -55.0,
+        "hvac": -40.0,
+        "furniture": -30.0,
+        "other": -50.0,
+    }
+    floor = floors.get(segment, -50.0)
+    return max(floor, min(0.0, adj_pct))
+
+
+def _condition_multiplier(condition: ConditionReport, llm: LLMAnalysisResult, rules: dict, segment: str = "other") -> float:
     severity_mult = rules["severity_multipliers"]
-    mult = 1.0
+
+    # 1. Damage-item severity — skip items marked acceptable_wear (cosmetic normal wear)
+    severity_factor = 1.0
     for item in condition.damage_items:
+        if getattr(item, "acceptable_wear", False):
+            continue
         sev = (item.severity or "").strip().lower() or "unknown"
-        mult *= float(severity_mult.get(sev, severity_mult.get("unknown", 0.95)))
-    if llm.valuation_inputs and llm.valuation_inputs.condition_adjustment_pct is not None:
-        adj = llm.valuation_inputs.condition_adjustment_pct
-        mult *= max(0.1, 1.0 + (adj / 100.0))
-    if condition.functional_issues:
-        mult *= float(rules["functional_issues_multiplier"])
-    if condition.overall_score is not None:
-        mult *= max(
+        severity_factor *= float(severity_mult.get(sev, severity_mult.get("unknown", 0.95)))
+
+    # 2. AI condition_adjustment_pct — authoritative single-shot adjustment from LLM
+    adj_factor = 1.0
+    has_adj_pct = llm.valuation_inputs and llm.valuation_inputs.condition_adjustment_pct is not None
+    if has_adj_pct:
+        adj = _cap_condition_adjustment(llm.valuation_inputs.condition_adjustment_pct, segment)
+        adj_factor = max(0.1, 1.0 + (adj / 100.0))
+
+    # 3. Functional issues — only when NOT already covered by condition_adjustment_pct
+    func_factor = 1.0
+    if condition.functional_issues and not has_adj_pct:
+        func_factor = float(rules["functional_issues_multiplier"])
+
+    # 4. Overall score — skip when condition_adjustment_pct is already provided to avoid
+    #    double-counting the same damage signal (score and pct both encode condition).
+    score_factor = 1.0
+    if condition.overall_score is not None and not has_adj_pct:
+        score_factor = max(
             float(rules["min_condition_score_factor"]),
             condition.overall_score / 100.0,
         )
+
+    mult = severity_factor * adj_factor * func_factor * score_factor
+    seg_mins = rules.get("segment_min_condition_multiplier", {})
+    min_mult = float(seg_mins.get(segment, rules["min_condition_multiplier"]))
     return max(
-        float(rules["min_condition_multiplier"]),
+        min_mult,
         min(float(rules["max_condition_multiplier"]), mult),
     )
 
@@ -109,7 +157,7 @@ def compute_valuation(
     resolved_age = resolve_asset_age(llm, asset=asset)
     age_years = midpoint_years(resolved_age)
 
-    cond_mult = _condition_multiplier(condition, llm, rules)
+    cond_mult = _condition_multiplier(condition, llm, rules, segment=segment)
     age_mult = _age_multiplier(segment, age_years, data, rules)
     as_is_mid = like_mid * cond_mult * age_mult
 

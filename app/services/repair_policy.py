@@ -16,11 +16,15 @@ _SCREEN_TERMS = ("screen", "display", "lcd", "glass", "monitor panel")
 _PHONE_LAPTOP_TERMS = ("phone", "smartphone", "laptop", "notebook", "tablet", "macbook", "iphone")
 _INDUSTRIAL_TERMS = ("machine", "industrial", "equipment", "lathe", "compressor", "generator", "tool")
 _FURNITURE_TERMS = ("furniture", "chair", "desk", "cabinet", "table")
+_VEHICLE_TERMS = ("vehicle", "car", "truck", "van", "suv", "nexon", "fleet", "sedan", "hatchback", "jeep")
+_VEHICLE_LOCATIONS = ("bumper", "fender", "panel", "door", "hood", "roof", "quarter", "grille", "underbody", "wheel", "tyre", "tire")
 
 
 def _asset_class(llm: LLMAnalysisResult) -> str:
     blob = " ".join(filter(None, [llm.category, llm.asset_type, llm.asset_name])).lower()
     seg = (llm.valuation_inputs.market_segment or "").lower() if llm.valuation_inputs else ""
+    if seg == "vehicle" or any(t in blob for t in _VEHICLE_TERMS):
+        return "vehicle"
     if seg in ("consumer_electronics",) or any(t in blob for t in _PHONE_LAPTOP_TERMS):
         return "phone_laptop"
     if seg == "industrial" or any(t in blob for t in _INDUSTRIAL_TERMS):
@@ -64,6 +68,44 @@ def _classify_damage(
 
     parsed_needed = _parse_repair_needed(llm_item_repair_needed)
     parsed_urgency = _parse_urgency(llm_item_urgency)
+
+    if asset_class == "vehicle":
+        is_structural = any(
+            t in dtype or t in location
+            for t in ("frame", "chassis", "engine", "transmission", "axle", "airbag", "suspension")
+        )
+        is_bumper_panel = any(
+            t in dtype or t in location
+            for t in _VEHICLE_LOCATIONS
+        ) or dtype in ("dent", "crack", "scratch", "scuff", "paint", "chip", "rust")
+        if is_structural or (severity == "severe" and item.affects_function):
+            return (
+                RepairNeeded.REQUIRED,
+                RepairUrgency.IMMEDIATE,
+                False,
+                "Structural or mechanical vehicle damage requires immediate repair — affects roadworthiness.",
+            )
+        if is_bumper_panel and severity in ("minor", "moderate"):
+            return (
+                RepairNeeded.COSMETIC_ONLY,
+                RepairUrgency.SCHEDULED,
+                severity == "minor",
+                "Vehicle body/bumper cosmetic damage. In India, a bumper repair costs ₹5,000–15,000 "
+                "and reduces resale by only 3–8%. Does not affect roadworthiness or function.",
+            )
+        if severity == "minor":
+            return (
+                RepairNeeded.COSMETIC_ONLY,
+                RepairUrgency.NONE,
+                True,
+                "Minor vehicle surface wear — acceptable for fleet use.",
+            )
+        return (
+            parsed_needed or RepairNeeded.COSMETIC_ONLY,
+            parsed_urgency or RepairUrgency.MONITOR,
+            llm_acceptable if llm_acceptable is not None else False,
+            "Vehicle damage — assess repair before next inspection.",
+        )
 
     if asset_class == "industrial":
         if severity == "severe" or item.affects_function:

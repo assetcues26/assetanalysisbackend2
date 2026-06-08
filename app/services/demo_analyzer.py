@@ -53,7 +53,7 @@ from app.services.erp_validation_engine import enrich_demo_verification
 from app.services.identity_validator import validate_identity
 from app.services.repair_policy import build_repair_plan
 from app.services.valuation_display import client_valuation
-from app.services.valuation_engine import compute_valuation
+from app.services.valuation_engine import compute_valuation, resolve_segment_for_asset
 
 logger = structlog.get_logger()
 V6_PROMPT_VERSION = "v6-demo"
@@ -95,10 +95,95 @@ def _money_inr_midpoint(lo: float | None, hi: float | None) -> float | None:
     return (float(lo) + float(hi)) / 2
 
 
+_CLIMATE_DISCOUNT_PCT: dict[tuple[str, str], float] = {
+    # (profile, segment) -> deduction percent (positive = lower value)
+    # Research sources: Cars24/Team-BHP India, ISHRAE coastal HVAC studies
+    ("coastal_humid", "vehicle"): 8.0,    # Underbody rust, softer Mumbai/Chennai used market
+    ("coastal_humid", "hvac"): 10.0,      # ISHRAE: coil lifespan 5-7 yr vs 10 yr rated
+    ("coastal_humid", "industrial"): 5.0, # Canopy corrosion, generator enclosure rust
+    ("coastal_humid", "other"): 3.0,      # General metal/enclosed assets
+    ("dry_hot_dust", "vehicle"): 3.0,     # Heat/UV paint fade; smaller than coastal effect
+    ("dry_hot_dust", "hvac"): 5.0,        # Dust clogging, filter stress
+    ("dry_hot_dust", "industrial"): 3.0,
+    ("humid_inland", "vehicle"): 4.0,     # Moderate corrosion without constant salt
+    ("humid_inland", "hvac"): 5.0,
+    ("humid_inland", "industrial"): 3.0,
+}
+
+_CLIMATE_REASONS: dict[tuple[str, str], str] = {
+    ("coastal_humid", "vehicle"):
+        "Mumbai/coastal fleet vehicles accumulate underbody rust and salt corrosion; "
+        "Cars24 and Team-BHP data show used-market pricing is consistently softer "
+        "vs dry NCR/Rajasthan equivalents.",
+    ("coastal_humid", "hvac"):
+        "ISHRAE guidelines: outdoor HVAC condenser coils in coastal India corrode "
+        "2–3× faster than in dry climates, shortening effective life from 10 years "
+        "to 5–7 years and depressing resale values.",
+    ("coastal_humid", "industrial"):
+        "Coastal salt spray accelerates canopy and exhaust-stack rust on generators "
+        "and industrial enclosures; buyers discount more than for dry-climate installs.",
+    ("coastal_humid", "other"):
+        "High humidity and salt air raise corrosion risk on metal components "
+        "and enclosed electronics at coastal sites.",
+    ("dry_hot_dust", "vehicle"):
+        "Intense UV, heat cycling, and road dust in dry regions (NCR, Rajasthan) "
+        "cause paint chalking and plastic fade; minor but measurable used-market impact.",
+    ("dry_hot_dust", "hvac"):
+        "Dust accumulation clogs evaporator fins and stresses bearings; "
+        "HVAC in dry-hot sites requires more frequent servicing.",
+    ("dry_hot_dust", "industrial"):
+        "Abrasive dust and heat cycling in dry regions accelerate seal and "
+        "filter wear on industrial machinery.",
+    ("humid_inland", "vehicle"):
+        "Humid inland climate (e.g. eastern/central India) causes moderate underbody "
+        "corrosion without the full coastal salt-spray effect.",
+    ("humid_inland", "hvac"):
+        "Persistent moisture and mould risk in humid inland sites reduces "
+        "HVAC component life and resale appeal.",
+    ("humid_inland", "industrial"):
+        "Elevated moisture without salt spray — moderate corrosion risk on "
+        "exposed metal parts in industrial equipment.",
+}
+
+
+def apply_climate_adjustment(
+    valuation: Valuation,
+    ctx: DemoContext,
+    segment: str,
+) -> tuple[Valuation, float]:
+    """Apply a deterministic climate discount to the as-is INR range.
+
+    Returns the updated Valuation and the discount percentage applied (0 if none).
+    Only applied to the as_is market estimate — Book NBV is never touched.
+    """
+    profile = infer_location_profile(ctx.location)
+    discount_pct = _CLIMATE_DISCOUNT_PCT.get((profile, segment), 0.0)
+    if discount_pct <= 0 or valuation.as_is is None:
+        return valuation, 0.0
+
+    factor = 1.0 - discount_pct / 100.0
+    inr = valuation.as_is.inr
+    usd = valuation.as_is.usd
+    new_inr_min = round(inr.min * factor, 2) if inr.min is not None else None
+    new_inr_max = round(inr.max * factor, 2) if inr.max is not None else None
+    new_usd_min = round(usd.min * factor, 2) if usd and usd.min is not None else None
+    new_usd_max = round(usd.max * factor, 2) if usd and usd.max is not None else None
+
+    from app.models.responses import MoneyRange, ValuationAmount
+    new_as_is = ValuationAmount(
+        inr=MoneyRange(min=new_inr_min, max=new_inr_max),
+        usd=MoneyRange(min=new_usd_min, max=new_usd_max),
+    )
+    valuation = valuation.model_copy(update={"as_is": new_as_is})
+    return valuation, discount_pct
+
+
 def build_climate_valuation_points(
     ctx: DemoContext,
     valuation: Valuation,
     llm: LLMAnalysisResult,
+    climate_discount_applied_pct: float = 0.0,
+    segment: str = "other",
 ) -> list[str]:
     profile = infer_location_profile(ctx.location)
     location = ctx.location
@@ -113,41 +198,39 @@ def build_climate_valuation_points(
     climate_label = profile_labels.get(profile, profile.replace("_", " "))
 
     parts: list[str] = [
-        f"Site context: {location} — {climate_label} climate.",
+        f"Site: {location} — {climate_label} climate.",
     ]
 
-    if profile == "coastal_humid":
-        if any(k in cat for k in ("hvac", "ac", "split", "window", "condenser")):
-            parts.append(
-                "Outdoor HVAC in coastal India often shows faster coil corrosion, cabinet rust, "
-                "and mould in drain paths; resale/as-is value tends to sit below comparable inland units."
-            )
-        elif "generator" in cat or "industrial" in cat:
-            parts.append(
-                "Standby generators near the coast face salt spray and humidity on canopies and exhaust "
-                "metal — buyers typically discount more than for dry-climate installs."
-            )
-        elif "vehicle" in cat or "suv" in cat:
-            parts.append(
-                "Fleet vehicles in coastal cities accumulate underbody rust and paint fade; "
-                "used-market pricing is often softer than in dry NCR/Rajasthan."
-            )
-        else:
-            parts.append(
-                "High humidity increases corrosion and mould risk on metal and enclosed electronics."
-            )
+    reason = _CLIMATE_REASONS.get((profile, segment))
+    if reason:
+        parts.append(reason)
+    elif profile == "coastal_humid":
+        parts.append(
+            "High humidity and salt air raise corrosion risk on metal components "
+            "and enclosed electronics at coastal sites."
+        )
     elif profile == "dry_hot_dust":
         parts.append(
-            "Dry heat and dust (typical of NCR, Rajasthan, Gujarat) stress filters, plastics, and paint; "
-            "electromechanical assets may see moderate downward pressure vs moderate-climate peers."
+            "Dry heat and dust (typical of NCR, Rajasthan, Gujarat) stress filters, "
+            "plastics, and paint — moderate downward pressure vs moderate-climate peers."
         )
     elif profile == "humid_inland":
         parts.append(
-            "Humid inland conditions (e.g. eastern India) raise mould and condensation wear without constant salt spray."
+            "Humid inland conditions raise mould and condensation wear without constant salt spray."
         )
     else:
         parts.append(
             "Moderate tier-1/tier-2 climate — location adds less extreme wear than coastal or desert sites."
+        )
+
+    if climate_discount_applied_pct > 0:
+        parts.append(
+            f"Location-based adjustment applied: −{climate_discount_applied_pct:.0f}% to current estimate "
+            f"(reduces as-is value vs a neutral inland baseline for this asset class)."
+        )
+    else:
+        parts.append(
+            "No location penalty applied for this asset class and climate profile."
         )
 
     as_is_mid = _money_inr_midpoint(
@@ -160,26 +243,21 @@ def build_climate_valuation_points(
         gap_pct = max(0.0, (1.0 - as_is_mid / like_mid) * 100.0)
         if gap_pct >= 5:
             parts.append(
-                f"The current estimate is about {gap_pct:.0f}% below the like-new reference, "
-                "reflecting photographed condition plus geographic wear typical for this site."
+                f"Net current estimate is ~{gap_pct:.0f}% below the like-new reference, "
+                "combining photographed condition and geographic wear for this site."
             )
         else:
             parts.append(
-                "The current estimate is close to like-new reference after condition adjustment — "
-                "limited visible wear for this location and asset class."
+                "Current estimate is close to like-new reference — limited visible wear "
+                "for this location and asset class."
             )
 
-    nbv_mid = (
-        _money_inr_midpoint(valuation.nbv.inr.min, valuation.nbv.inr.max)
-        if valuation.nbv
-        else None
-    )
-    llm_note = (
-        (llm.valuation_assumptions or "").strip()
-        or (getattr(llm.reasoning, "valuation_deliberation_notes", None) or "").strip()
-        if llm.reasoning
-        else ""
-    )
+    llm_note = ""
+    if llm.reasoning:
+        llm_note = (
+            (llm.valuation_assumptions or "").strip()
+            or (getattr(llm.reasoning, "valuation_deliberation_notes", None) or "").strip()
+        )
     if not llm_note and llm.valuation_inputs and llm.valuation_inputs.valuation_rationale:
         llm_note = llm.valuation_inputs.valuation_rationale.strip()
     bullets = [p for p in parts if p]
@@ -325,6 +403,8 @@ class DemoAnalysisService:
             asset=asset,
             settings=self.settings,
         )
+        _segment = resolve_segment_for_asset(llm, self.settings)
+        valuation, climate_discount_pct = apply_climate_adjustment(valuation, demo_context, _segment)
         valuation = apply_demo_book_nbv(
             valuation,
             demo_context.book_nbv_inr,
@@ -338,7 +418,9 @@ class DemoAnalysisService:
                 "location": demo_context.location,
                 "location_profile": infer_location_profile(demo_context.location),
                 "climate_valuation_points": build_climate_valuation_points(
-                    demo_context, valuation, llm
+                    demo_context, valuation, llm,
+                    climate_discount_applied_pct=climate_discount_pct,
+                    segment=_segment,
                 ),
             }
         )

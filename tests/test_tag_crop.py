@@ -8,16 +8,16 @@ def test_lower_right_crop_hint():
     hint = frame_position_to_crop_hint("lower-right", image_index=2)
     assert hint is not None
     assert hint.image_index == 2
-    assert hint.x_pct > 50
-    assert hint.y_pct > 50
-    assert hint.width_pct == 35.0
+    assert hint.x_pct >= 40
+    assert hint.y_pct >= 40
+    assert hint.width_pct == 50.0
 
 
 def test_bottom_right_alias():
     hint = frame_position_to_crop_hint("bottom right")
     assert hint is not None
-    assert hint.x_pct > 50
-    assert hint.y_pct > 50
+    assert hint.x_pct >= 40
+    assert hint.y_pct >= 40
 
 
 def test_upper_left_crop_hint():

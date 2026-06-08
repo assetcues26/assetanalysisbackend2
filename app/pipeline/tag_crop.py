@@ -37,7 +37,7 @@ _POSITION_ALIASES: dict[str, tuple[str, str]] = {
 
 _HORIZ = frozenset({"left", "center", "right"})
 _VERT = frozenset({"top", "center", "bottom"})
-_BOX_SIZE = 0.35
+_BOX_SIZE = 0.50
 
 
 def _normalize_position(raw: str | None) -> tuple[str, str] | None:

@@ -245,54 +245,6 @@
       ]
     },
     {
-      "catalog_id": "gen-007",
-      "asset_name": "Cummins 62.5 kVA C62.5D5P",
-      "acquisition_date": "2021-09-12",
-      "asset_age_years": 4.74,
-      "images": [
-        {
-          "condition": "best",
-          "angle_hint": "generator_set",
-          "description": "Industrial diesel gensets staged for deploy — well maintained",
-          "license": "CC BY-SA 4.0 (Wikimedia)",
-          "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Diesel_generators_waited_to_be_airlifted,_Nice_Airport,_October_2020.jpg",
-          "page_url": "https://commons.wikimedia.org/wiki/File:Diesel_generators_waited_to_be_airlifted,_Nice_Airport,_October_2020.jpg"
-        },
-        {
-          "condition": "good",
-          "angle_hint": "generator_set",
-          "description": "Diesel generator room — good operating condition",
-          "license": "CC BY-SA 3.0 (Wikimedia)",
-          "download_url": "https://upload.wikimedia.org/wikipedia/commons/4/41/Champlain_diesel_generators.jpg",
-          "page_url": "https://commons.wikimedia.org/wiki/File:Champlain_diesel_generators.jpg"
-        },
-        {
-          "condition": "average",
-          "angle_hint": "engine_closeup",
-          "description": "Diesel engine parts — average plant-age wear",
-          "license": "Unsplash License",
-          "download_url": "https://unsplash.com/photos/JqEY48B4RP4/download?force=true",
-          "page_url": "https://unsplash.com/photos/close-up-of-old-diesel-engines-and-parts-JqEY48B4RP4"
-        },
-        {
-          "condition": "fair",
-          "angle_hint": "engine_closeup",
-          "description": "Rusty blue industrial engine — fair corrosion",
-          "license": "Public Domain (Piqsels)",
-          "download_url": "https://cdn.piqsels.com/public-domain-photo-fksci.jpg",
-          "page_url": "https://www.piqsels.com/en/public-domain-photo-fksci"
-        },
-        {
-          "condition": "damaged",
-          "angle_hint": "generator_set",
-          "description": "Museum/display aged diesel genset — severe wear reference",
-          "license": "CC BY-SA 3.0 (Wikimedia)",
-          "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/53/Ruston_6VE_and_dynamo.jpg",
-          "page_url": "https://commons.wikimedia.org/wiki/File:Ruston_6VE_and_dynamo.jpg"
-        }
-      ]
-    },
-    {
       "catalog_id": "vehicle-010",
       "asset_name": "Tata Nexon XZ+ Petrol",
       "acquisition_date": "2021-02-14",

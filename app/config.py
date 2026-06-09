@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     # Cross-device capture sessions (requires Supabase)
     capture_session_enabled: bool = False
     capture_session_ttl_hours: int = 2
-    capture_session_analyze_stale_seconds: int = 60
+    capture_session_analyze_stale_seconds: int = 45
     capture_storage_bucket: str = "capture-images"
     session_rate_limit_per_minute: int = 120
     frontend_base_url: str = ""

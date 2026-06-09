@@ -5,6 +5,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from app.models.history import ImageUrls
+
 
 class UnifiedViewMethod(str, Enum):
     COLLAGE = "collage"
@@ -331,6 +333,9 @@ class AnalysisPolicy(BaseModel):
 class AnalyzeResponse(BaseModel):
     collage_base64: Optional[str] = None
     request_id: str
+    entry_id: Optional[str] = None
+    saved_to_db: bool = False
+    image_urls: Optional[ImageUrls] = None
     status: str = "success"
     processing_time_ms: int
     analysis_method: UnifiedViewMethod

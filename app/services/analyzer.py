@@ -28,6 +28,7 @@ from app.services.field_merger import _clean_list, to_asset_details
 from app.services.fx import get_usd_to_inr
 from app.services.gemini import GeminiService
 from app.services.condition_mapper import (
+    resolve_condition_grade,
     build_damage_items,
     damage_needs_review,
     stickers_need_review,
@@ -48,6 +49,7 @@ from app.services.placement_mapper import (
 from app.services.reasoning_summary import build_reasoning_summary
 from app.services.repair_policy import build_repair_plan
 from app.services.valuation_display import client_valuation
+from app.services.history_repository import get_history_repository
 from app.services.valuation_engine import compute_valuation
 
 logger = structlog.get_logger()
@@ -65,6 +67,8 @@ class AssetAnalysisService:
         files: list[UploadTuple],
         method: UnifiedViewMethod,
         locale: str | None = None,
+        processing_mode: str | None = None,
+        api_route: str | None = None,
     ) -> AnalyzeResponse:
         locale = locale or self.settings.default_locale
         request_id = str(uuid.uuid4())
@@ -106,7 +110,7 @@ class AssetAnalysisService:
 
         identity_result = validate_identity(
             llm,
-            min_confidence=self.settings.valuation_confidence_threshold,
+            min_confidence=self.settings.field_confidence_threshold,
         )
         if not identity_result.passed or identity_result.withheld_identity:
             IDENTITY_LOW_CONFIDENCE.inc()
@@ -146,10 +150,7 @@ class AssetAnalysisService:
 
         review_required = (
             identity_result.withheld_identity
-            or identity_result.generation_ambiguous
             or confidence.overall < self.settings.review_confidence_threshold
-            or valuation.status == ValuationStatus.WITHHELD
-            or (valuation.status == ValuationStatus.INDICATIVE_ONLY and valuation.confidence < self.settings.valuation_confidence_threshold)
             or identifiers_need_review(llm, asset.asset_tag_number, len(processed))
             or stickers_need_review(llm)
             or stickers_image_index_need_review(llm.stickers, len(processed))
@@ -200,6 +201,21 @@ class AssetAnalysisService:
             cost=cost,
         )
 
+        entry_id, saved_to_db, image_urls = await get_history_repository(
+            self.settings
+        ).save_analysis(
+            user_id=self.settings.demo_user_id,
+            request_id=request_id,
+            response=response,
+            processed_images=processed,
+            method=method,
+            processing_mode=processing_mode,
+            api_route=api_route,
+        )
+        response.entry_id = entry_id
+        response.saved_to_db = saved_to_db
+        response.image_urls = image_urls
+
         logger.info(
             "analysis_complete",
             request_id=request_id,
@@ -215,6 +231,7 @@ class AssetAnalysisService:
             total_cost_usd=cost.total_cost_usd,
             elapsed_ms=elapsed_ms,
             stage_timings=stage_timings,
+            saved_to_db=saved_to_db,
         )
         return response
 
@@ -243,7 +260,7 @@ class AssetAnalysisService:
                 score = None
 
         return ConditionReport(
-            grade=llm.condition_grade,
+            grade=resolve_condition_grade(llm.condition_grade, score or llm.condition_score),
             overall_score=score,
             summary=llm.condition_summary,
             cosmetic_condition=llm.cosmetic_condition,

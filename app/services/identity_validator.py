@@ -66,15 +66,8 @@ def validate_identity(llm: LLMAnalysisResult, *, min_confidence: float = 0.75) -
             flags.append("generation_ambiguous")
 
     generation_ambiguous = "generation_ambiguous" in flags
-    withheld = confidence < min_confidence or "insufficient_identity_candidates" in flags
-
-    if withheld:
-        llm.asset_name = llm.asset_name or "Unidentified asset"
-        llm.model = "Unidentified"
-        if confidence < min_confidence:
-            llm.confidence_asset_name = min(confidence, 0.5)
-
-    # Ambiguous generation affects valuation confidence, not whether we compute amounts.
+    # Production demo: flag quality issues but do not block output or rewrite identity.
+    withheld = confidence < min_confidence
     passed = not withheld
 
     return IdentityValidationResult(

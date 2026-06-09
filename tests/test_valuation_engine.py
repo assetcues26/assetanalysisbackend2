@@ -69,7 +69,7 @@ def test_as_is_decreases_with_severe_damage():
     assert heavy_val.as_is.usd.max < mild_val.as_is.usd.max
 
 
-def test_indicative_when_identity_fails_still_returns_amounts():
+def test_weak_identity_still_returns_ok_status_and_amounts():
     llm = LLMAnalysisResult(
         brand="Apple",
         model="Unidentified",
@@ -81,7 +81,7 @@ def test_indicative_when_identity_fails_still_returns_amounts():
     condition = ConditionReport()
     identity = IdentityValidationResult(passed=False, identity_confidence=0.4, withheld_identity=True)
     val = compute_valuation(llm, condition, identity, usd_to_inr=100.0, valuation_confidence_min=0.75)
-    assert val.status == ValuationStatus.INDICATIVE_ONLY
+    assert val.status == ValuationStatus.OK
     assert val.as_is.usd.min is not None
     assert val.as_is.usd.max is not None
-    assert "Indicative only" in (val.assumptions or "")
+    assert val.assumptions

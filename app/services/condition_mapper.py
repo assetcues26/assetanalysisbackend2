@@ -170,3 +170,49 @@ def stickers_need_review(llm: LLMAnalysisResult) -> bool:
 
 def build_damage_items(llm: LLMAnalysisResult, images_analyzed: int) -> list[DamageItem]:
     return merge_damage_sources(llm, images_analyzed)
+
+
+_GRADE_ALIASES = {
+    "excellent": "Excellent",
+    "good": "Good",
+    "fair": "Fair",
+    "average": "Fair",
+    "moderate": "Fair",
+    "poor": "Poor",
+    "bad": "Poor",
+    "damaged": "Poor",
+    "critical": "Poor",
+}
+
+
+def _score_to_hundred(score: int | float | None) -> int | None:
+    if score is None:
+        return None
+    try:
+        s = int(round(float(score)))
+    except (TypeError, ValueError):
+        return None
+    if 1 <= s <= 10:
+        s *= 10
+    return max(0, min(100, s))
+
+
+def resolve_condition_grade(grade: str | None, score: int | float | None = None) -> str | None:
+    """Normalize LLM grade; derive from condition_score when grade is missing."""
+    if grade:
+        key = str(grade).strip().lower()
+        if key in _GRADE_ALIASES:
+            return _GRADE_ALIASES[key]
+        if key not in ("unknown", "n/a", "na", ""):
+            return str(grade).strip().title()
+
+    normalized = _score_to_hundred(score)
+    if normalized is None:
+        return None
+    if normalized >= 85:
+        return "Excellent"
+    if normalized >= 70:
+        return "Good"
+    if normalized >= 50:
+        return "Fair"
+    return "Poor"

@@ -9,8 +9,9 @@ Use internal deliberation before filling structured fields. Fill "reasoning" com
 - age_estimation_rationale: BEFORE setting model years — weigh nameplate/mfg date stickers, serial format, design generation (ports, bezels, badge style), wear vs expected age for that class (HVAC, electronics, furniture). State what evidence supports the year range and what is uncertain.
 - valuation_deliberation_notes: BEFORE valuation_inputs — reason in Indian Rupees (₹) about realistic like-new replacement and used value for the IDENTIFIED brand/model in the India market (location matters: metro vs tier-2); how condition and age should move value; flag if reference price is uncertain.
 - uncertainty_flags[]: use when appropriate: generation_ambiguous, image_quality_low, partial_view, label_unreadable, age_uncertain, valuation_uncertain.
+- Photo coverage — when an angle is NOT clearly shown, add: angle_missing_front, angle_missing_tag_closeup, angle_missing_damage_closeup, angle_missing_context_wide.
 - damage_notes: synthesize defects across ALL images.
-- repair_judgement_notes: engineer judgement using asset class (see repair table below).
+- repair_judgement_notes: engineer judgement using asset class (see playbooks and repair table below).
 
 If confidence_asset_name would be below 0.75: set model to "Unidentified", add uncertainty_flags, do NOT invent a specific generation.
 If model year is uncertain by more than ~2 years: widen estimated_model_year_min/max, add age_uncertain, and lower valuation_confidence below 0.7 rather than guessing a precise year.
@@ -31,16 +32,34 @@ barcode_present: true ONLY when a physical asset tag or barcode label is visible
 barcode fields, stickers[] (one per label), visible_labels[].
 seen_in_image: integer 1..N only; never null.
 
+=== ASSET-CLASS PLAYBOOKS (infer class from images — no ERP input) ===
+Apply the playbook matching the identified category/asset_type:
+
+HVAC (Split AC, Window AC, Cooler): tag on service label or outdoor chassis; fin corrosion and outdoor rust are material; filter dust and mounting rust matter.
+
+IT Equipment (Laptop, Desktop, Printer, Display): tag on bottom chassis, rear label, or side barcode — NOT manufacturer logos alone. Screen cracks and port damage are functional for laptops/desktops; printer panel scuffs are usually cosmetic.
+
+Furniture (Chair, Desk, Cabinet): tag underside or rear frame; scratches and fabric wear often acceptable_wear; structural cracks are not.
+
+Vehicle (Car, SUV, Van, Truck, Fleet): bumper dents/scratches/paint chips are MINOR cosmetic — acceptable_wear=true; single-panel cosmetic damage is NOT severe. condition_grade: Good for cosmetic-only; Fair for multiple panels; Poor only for structural/mechanical damage. condition_score 7–8/10 for light cosmetic-only fleet wear. condition_adjustment_pct max -10% for cosmetic-only; never exceed -35% unless frame damage or inoperable.
+
+Industrial (Generator, Machine): nameplate/chassis plate; heavy rust, oil leaks, missing guards are severe; cosmetic paint chips may be acceptable_wear.
+
 === STEP 4 — CONDITION & DAMAGE (asset-class repair rules) ===
 REPAIR TOLERANCE BY CLASS (apply to every damage_items[] row):
 | Class | Minor scratch/scuff | Screen/display crack | Color fade/discoloration |
 | phone/laptop/tablet | cosmetic_only, acceptable_wear=false | repair_needed=required, urgency=immediate | cosmetic_only if body only |
+| it_equipment/printer | cosmetic_only | N/A unless control panel broken | cosmetic_only |
+| vehicle/fleet | acceptable_wear=true | cosmetic_only for bumper/panel | acceptable_wear=true |
 | industrial/machine | acceptable_wear=true, repair_needed=none | N/A unless HMI screen | acceptable_wear=true |
 | furniture | cosmetic_only | N/A | acceptable_wear=true |
+| hvac outdoor | monitor rust severity | N/A | acceptable_wear on cosmetic panels |
 
 Each damage_items[] object MUST include: location, type, severity (minor|moderate|severe), seen_in_image, detail, affects_function, repair_action, repair_needed (none|cosmetic_only|recommended|required), repair_urgency (none|monitor|scheduled|immediate), acceptable_wear (bool).
 
-condition_summary, condition_grade, condition_score (0-100), cosmetic_condition, structural_condition, functional_status, cleanliness, wear_level, usability, repair_recommendation, estimated_remaining_life, missing_parts[], functional_issues[], positive_aspects[].
+REQUIRED — always set condition_grade AND condition_summary:
+condition_summary (narrative), condition_grade (exactly one word: Excellent|Good|Fair|Poor|Bad — never null), condition_score (1–10 integer; 10=perfect, 1=severely damaged), cosmetic_condition, structural_condition, functional_status, cleanliness, wear_level, usability, repair_recommendation, estimated_remaining_life, missing_parts[], functional_issues[], positive_aspects[].
+Map condition_grade from overall damage: Excellent/Good = light cosmetic wear only; Fair = multiple moderate issues or one functional concern; Poor/Bad = severe damage or major functional failure.
 
 === STEP 5 — VALUATION INPUTS ONLY (no final FMV) ===
 Fill valuation_inputs — do NOT output estimated_value_usd_* or like_new_value_usd_*:

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.config import Settings
+from app.config import Settings, get_settings
 from app.main import create_app
 from app.models.responses import TokenUsage
 from app.services.fx import FxResult
@@ -15,9 +15,24 @@ from tests.conftest import make_test_image
 from tests.test_api import _mock_llm
 
 
-@pytest.fixture
-def client():
+def _make_v6_client():
     return TestClient(create_app())
+
+
+@pytest.fixture
+def client(monkeypatch):
+    monkeypatch.setenv("V6_DEMO_ENABLED", "true")
+    get_settings.cache_clear()
+    yield _make_v6_client()
+    get_settings.cache_clear()
+
+
+@pytest.fixture
+def v6_disabled_client(monkeypatch):
+    monkeypatch.setenv("V6_DEMO_ENABLED", "false")
+    get_settings.cache_clear()
+    yield _make_v6_client()
+    get_settings.cache_clear()
 
 
 def _demo_context_payload() -> dict:
@@ -37,6 +52,11 @@ def _demo_context_payload() -> dict:
     }
 
 
+def test_v6_disabled_returns_404(v6_disabled_client):
+    response = v6_disabled_client.get("/v6/demo/catalog")
+    assert response.status_code == 404
+
+
 def test_demo_catalog_endpoint(client):
     response = client.get("/v6/demo/catalog")
     assert response.status_code == 200
@@ -53,8 +73,10 @@ def test_demo_analyze_requires_context(client):
     assert response.status_code in (400, 422)
 
 
-def test_demo_analyze_success_mocked():
-    settings = Settings(gemini_api_key="fake-key")
+def test_demo_analyze_success_mocked(monkeypatch):
+    monkeypatch.setenv("V6_DEMO_ENABLED", "true")
+    get_settings.cache_clear()
+    settings = Settings(gemini_api_key="fake-key", v6_demo_enabled=True)
     usage = TokenUsage(
         input_tokens=5000,
         output_tokens=1500,
@@ -76,7 +98,7 @@ def test_demo_analyze_success_mocked():
         ) as mock_analyze,
         patch("app.services.demo_analyzer.get_usd_to_inr", new=AsyncMock(return_value=fx)),
     ):
-        client = TestClient(create_app())
+        client = _make_v6_client()
         imgs = [make_test_image((i * 30, 70, 110)) for i in range(2)]
         files = [("images", (f"img{i}.jpg", img, "image/jpeg")) for i, img in enumerate(imgs)]
         response = client.post(
@@ -85,6 +107,7 @@ def test_demo_analyze_success_mocked():
             data={"demo_context": json.dumps(ctx), "locale": "en-IN"},
         )
 
+    get_settings.cache_clear()
     assert response.status_code == 200, response.text
     mock_analyze.assert_awaited_once()
     data = response.json()
@@ -123,13 +146,20 @@ def test_demo_analyze_success_mocked():
     assert verify["erp_book_nbv_inr"] == pytest.approx(book, rel=1e-3)
 
 
-def test_demo_analyze_allows_up_to_max_images_not_latency_cap():
+def test_demo_analyze_allows_up_to_max_images_not_latency_cap(monkeypatch):
     """V6 should allow MAX_IMAGES (10), not the v1 latency cap (6)."""
-    settings = Settings(gemini_api_key="fake-key", max_images=10, max_images_latency_mode=6)
+    monkeypatch.setenv("V6_DEMO_ENABLED", "true")
+    get_settings.cache_clear()
+    settings = Settings(
+        gemini_api_key="fake-key",
+        max_images=10,
+        max_images_latency_mode=6,
+        v6_demo_enabled=True,
+    )
     ctx = _demo_context_payload()
 
     with patch("app.api.v6.demo.get_settings", return_value=settings):
-        client = TestClient(create_app())
+        client = _make_v6_client()
         imgs = [make_test_image((i * 10, 70, 110)) for i in range(7)]
         files = [("images", (f"img{i}.jpg", img, "image/jpeg")) for i, img in enumerate(imgs)]
         with patch(
@@ -150,15 +180,18 @@ def test_demo_analyze_allows_up_to_max_images_not_latency_cap():
                     data={"demo_context": json.dumps(ctx), "locale": "en-IN"},
                 )
 
+    get_settings.cache_clear()
     assert response.status_code == 200, response.text
 
 
-def test_demo_analyze_rejects_over_max_images():
-    settings = Settings(gemini_api_key="fake-key", max_images=10)
+def test_demo_analyze_rejects_over_max_images(monkeypatch):
+    monkeypatch.setenv("V6_DEMO_ENABLED", "true")
+    get_settings.cache_clear()
+    settings = Settings(gemini_api_key="fake-key", max_images=10, v6_demo_enabled=True)
     ctx = _demo_context_payload()
 
     with patch("app.api.v6.demo.get_settings", return_value=settings):
-        client = TestClient(create_app())
+        client = _make_v6_client()
         imgs = [make_test_image((i * 5, 70, 110)) for i in range(11)]
         files = [("images", (f"img{i}.jpg", img, "image/jpeg")) for i, img in enumerate(imgs)]
         response = client.post(
@@ -167,5 +200,6 @@ def test_demo_analyze_rejects_over_max_images():
             data={"demo_context": json.dumps(ctx), "locale": "en-IN"},
         )
 
+    get_settings.cache_clear()
     assert response.status_code == 400
     assert "At most 10 images allowed" in response.json()["detail"]

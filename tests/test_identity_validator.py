@@ -4,7 +4,7 @@ from app.models.responses import LLMIdentityCandidate, LLMReasoningTrace, LLMAna
 from app.services.identity_validator import validate_identity
 
 
-def test_electronics_requires_two_candidates():
+def test_electronics_single_candidate_flags_but_passes():
     llm = LLMAnalysisResult(
         asset_name="Apple iPhone",
         category="Smartphone",
@@ -19,8 +19,9 @@ def test_electronics_requires_two_candidates():
         ),
     )
     result = validate_identity(llm)
-    assert not result.passed
+    assert result.passed
     assert "insufficient_identity_candidates" in result.uncertainty_flags
+    assert not result.withheld_identity
 
 
 def test_high_confidence_with_candidates_passes():

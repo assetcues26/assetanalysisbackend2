@@ -23,6 +23,8 @@ def test_analysis_prompt_v2_framing():
     assert "STEP 1" in prompt
     assert "VALUATION INPUTS ONLY" in prompt
     assert "phone/laptop" in prompt.lower() or "phone/laptop/tablet" in prompt.lower()
+    assert "ASSET-CLASS PLAYBOOKS" in prompt
+    assert "Excellent|Good|Fair|Poor|Bad" in prompt
     assert "age_estimation_rationale" in prompt
     assert "valuation_deliberation_notes" in prompt
     assert "description: REQUIRED" in prompt

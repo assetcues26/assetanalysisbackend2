@@ -77,10 +77,11 @@ async def resolve_uploaded_images(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"At least {settings.min_images} image file is required",
         )
-    if len(real) > settings.max_images:
+    limit = settings.upload_image_limit
+    if len(real) > limit:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"At most {settings.max_images} images allowed (got {len(real)})",
+            detail=f"At most {limit} images allowed (got {len(real)})",
         )
 
     parsed: list[UploadTuple] = []

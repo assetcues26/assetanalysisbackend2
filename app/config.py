@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     min_images: int = 1
     max_images: int = 10
     max_image_size_mb: int = 15
+    max_session_upload_total_mb: int = 15
     max_preprocess_edge_px: int = 2048
     max_gemini_payload_mb: int = 18
     gemini_analyze_temperature: float = 0.0
@@ -46,13 +47,35 @@ class Settings(BaseSettings):
 
     # 0 = do not log slow-request warnings against a target
     analysis_target_ms: int = 0
-    max_images_latency_mode: int = 6
+    # Must match max_images for collage/multi — all uploaded angles are processed (no 6-image cap).
+    max_images_latency_mode: int = 10
 
     review_confidence_threshold: float = 0.65
     field_confidence_threshold: float = 0.5
     valuation_confidence_threshold: float = 0.75
 
     prompt_version: str = "v2"
+
+    # V6 ERP demo endpoints (/v6/demo/*). Off by default — no hardcoded catalog exposed.
+    v6_demo_enabled: bool = False
+
+    # Supabase persistence (service role — backend only, never expose to frontend)
+    supabase_url: str = ""
+    supabase_service_role_key: str = ""
+    supabase_storage_bucket: str = "analysis-images"
+    supabase_signed_url_ttl_seconds: int = 3600
+    supabase_persist_enabled: bool = False
+    demo_user_id: int = 100
+    # Optional shared secret for /v1/history* routes (empty = no guard)
+    demo_api_key: str = ""
+    history_rate_limit_per_minute: int = 120
+
+    # Cross-device capture sessions (requires Supabase)
+    capture_session_enabled: bool = False
+    capture_session_ttl_hours: int = 2
+    capture_storage_bucket: str = "capture-images"
+    session_rate_limit_per_minute: int = 120
+    frontend_base_url: str = ""
 
     # India-first client defaults
     default_locale: str = "en-IN"
@@ -70,9 +93,18 @@ class Settings(BaseSettings):
         return self.max_image_size_mb * 1024 * 1024
 
     @property
+    def max_session_upload_total_bytes(self) -> int:
+        return self.max_session_upload_total_mb * 1024 * 1024
+
+    @property
     def max_gemini_payload_bytes(self) -> int:
         """Total inline payload budget for a single Gemini API call."""
         return self.max_gemini_payload_mb * 1024 * 1024
+
+    @property
+    def upload_image_limit(self) -> int:
+        """Max images per analyze request (collage + multi). Uses full max_images batch."""
+        return self.max_images
 
     @property
     def max_multipart_part_bytes(self) -> int:

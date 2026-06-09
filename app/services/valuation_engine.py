@@ -177,21 +177,18 @@ def compute_valuation(
     if resolved_age is None and age_years is None:
         confidence = min(confidence, float(rules["missing_age_confidence_cap"]))
 
+    # Always return amounts with status ok — confidence and assumptions carry uncertainty.
     status = ValuationStatus.OK
-    if confidence < valuation_confidence_min:
-        status = ValuationStatus.INDICATIVE_ONLY
     if identity.generation_ambiguous:
-        status = ValuationStatus.INDICATIVE_ONLY
         confidence = min(confidence, float(rules["generation_ambiguous_confidence_cap"]))
     if identity_weak:
-        status = ValuationStatus.INDICATIVE_ONLY
         confidence = min(confidence, float(rules["weak_identity_confidence_cap"]))
+    if confidence < valuation_confidence_min:
+        confidence = min(confidence, valuation_confidence_min)
 
     assumptions = llm.valuation_inputs.valuation_rationale if llm.valuation_inputs else None
     if identity_weak:
-        weak_note = (
-            "Indicative only — identity or model not verified; verify before client-facing use."
-        )
+        weak_note = "Identity confidence is low — verify brand/model before client-facing use."
         assumptions = f"{weak_note} {assumptions}".strip() if assumptions else weak_note
     if not assumptions:
         assumptions = llm.valuation_assumptions

@@ -9,6 +9,7 @@ from prometheus_client import make_asgi_app
 
 from app.api.v1.router import api_router, router as v1_router
 from app.api.v6.router import router as v6_router
+from app.config import get_settings
 from app.middleware.multipart import MultipartSizeMiddleware
 from app.utils.network import get_all_lan_ipv4, get_lan_ipv4
 
@@ -43,8 +44,11 @@ def create_app() -> FastAPI:
     # After CORS so the patched Request reaches route handlers (Starlette default part cap is 1MB).
     app.add_middleware(MultipartSizeMiddleware)
 
+    settings = get_settings()
+
     app.include_router(v1_router)
-    app.include_router(v6_router)
+    if settings.v6_demo_enabled:
+        app.include_router(v6_router)
     app.include_router(api_router)
     app.mount("/metrics", make_asgi_app())
 

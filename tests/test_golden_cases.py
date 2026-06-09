@@ -111,7 +111,7 @@ def test_golden_identity(golden_cases):
                 usd_to_inr=100.0,
                 valuation_confidence_min=0.75,
             )
-            assert val.status == ValuationStatus.INDICATIVE_ONLY, case["id"]
+            assert val.status == ValuationStatus.OK, case["id"]
             assert val.as_is.usd.min is not None, case["id"]
 
 

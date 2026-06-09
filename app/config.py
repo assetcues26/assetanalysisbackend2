@@ -43,7 +43,9 @@ class Settings(BaseSettings):
     gemini_max_retries: int = 2
     # 0 = no hard cap on Gemini call duration (wait_for disabled)
     gemini_timeout_seconds: int = 30
-    gemini_hard_timeout_seconds: int = 55
+    # Keep below Vercel's 60s function cap so failures return cleanly
+    # instead of the platform killing the request mid-flight.
+    gemini_hard_timeout_seconds: int = 45
 
     # 0 = do not log slow-request warnings against a target
     analysis_target_ms: int = 0

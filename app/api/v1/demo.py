@@ -54,5 +54,5 @@ async def clear_demo_data(
         logger.exception("clear_demo_data_failed", error=str(exc))
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Could not clear demo data: {exc}",
+            detail="Could not clear demo data. Try again shortly.",
         ) from exc

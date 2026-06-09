@@ -87,12 +87,7 @@ async def create_session(
         logger.exception("create_session_failed", error=str(exc))
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=(
-                "Capture session database is not ready. "
-                "Run backend/supabase/migrations SQL in your Supabase project, "
-                "create storage buckets analysis-images and capture-images, "
-                f"then redeploy. ({exc})"
-            ),
+            detail="Phone sessions are temporarily unavailable. Try again shortly.",
         ) from exc
     return CreateSessionResponse(
         session_token=detail.session_token,

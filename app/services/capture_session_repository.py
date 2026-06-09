@@ -59,7 +59,13 @@ class CaptureSessionRepository:
         return f"user_{user_id}/sessions/{session_id}"
 
     def _upload_path(self, user_id: int, session_id: str, sort_order: int) -> str:
-        return f"{self._storage_prefix(user_id, session_id)}/upload_{sort_order:02d}.jpg"
+        # Unique suffix prevents path collisions/overwrites when images are
+        # deleted and re-added (sort_order alone is reused after renumbering).
+        suffix = secrets.token_hex(4)
+        return (
+            f"{self._storage_prefix(user_id, session_id)}/"
+            f"upload_{sort_order:02d}_{suffix}.jpg"
+        )
 
     def _signed_url(self, storage_path: str) -> str | None:
         try:
@@ -534,7 +540,11 @@ class CaptureSessionRepository:
         except Exception as exc:
             logger.error("session_analyze_failed", token_prefix=token[:8], error=str(exc))
             await asyncio.to_thread(self._unlock_session_sync, row["id"])
-            return None, str(exc)
+            row["status"] = "active"
+            return (
+                self._to_detail(row, images),
+                "Analysis failed — please try again.",
+            )
 
 
 _repository: CaptureSessionRepository | None = None

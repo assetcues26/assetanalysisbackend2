@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [tool.vercel]
-entrypoint = "index:app"
+entrypoint = "api.index:app"
 
 [tool.uvicorn]
 app = "app.main:app"

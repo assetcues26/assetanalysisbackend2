@@ -102,14 +102,14 @@
     },
     {
       "catalog_id": "macbook-004",
-      "asset_name": "Apple Macbook Pro",
+      "asset_name": "Apple MacBook Pro 16-inch Intel",
       "acquisition_date": "2022-01-14",
-      "asset_age_years": 4.39,
+      "asset_age_years": 4.40,
       "images": [
         {
           "condition": "best",
           "angle_hint": "full_asset",
-          "description": "MacBook Pro on desk — excellent cosmetic (CIPLA Goa class asset)",
+          "description": "MacBook Pro 16-inch on desk — excellent cosmetic (CIPLA Goa class asset)",
           "license": "Unsplash License",
           "download_url": "https://unsplash.com/photos/5-KmbSe5ivg/download?force=true",
           "page_url": "https://unsplash.com/photos/apple-macbook-pro-on-desk-5-KmbSe5ivg"

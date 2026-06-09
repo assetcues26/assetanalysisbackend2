@@ -70,9 +70,9 @@
     "asset_number": "10000052",
     "asset_tag_number": "10000052",
     "asset_name": "Apple Macbook Pro",
-    "description": "Apple MacBook Pro 13-inch (M1, 16 GB / 512 GB SSD) — corporate IT issue for engineering lead. Asset tag with QR on palm rest (CIPLA Goa site).",
+    "description": "Apple MacBook Pro 16-inch (Intel Core i7-9750H, 16 GB / 512 GB SSD) — corporate IT issue for engineering lead. Asset tag with QR on palm rest (CIPLA Goa site).",
     "make": "Apple",
-    "model": "MacBook Pro 13-inch (M1, 16GB/512GB)",
+    "model": "MacBook Pro 16-inch (Intel Core i7, 16GB/512GB)",
     "category": "IT Assets",
     "subcategory": "Laptop",
     "company_code": "1000",
@@ -91,11 +91,11 @@
     "depreciation_method": "SLM",
     "useful_life_years": 5,
     "residual_value_pct": 0.05,
-    "original_cost_inr": 169900,
-    "far_price_basis": "Apple India CTO band: Smartprix lists M1/16GB/256GB at ₹1,49,900; 512 GB SSD upgrade ~₹20,000 → ₹1,69,900 capitalized (Jan 2022). xcoder.in lists 512 GB/8 GB at ₹1,42,900 excl. tax.",
+    "original_cost_inr": 199900,
+    "far_price_basis": "Apple India official launch price for MacBook Pro 16-inch Intel Core i7 / 16 GB / 512 GB SSD: ₹1,99,900 (Apple.com India, Nov 2019). Unit purchased Jan 2022 at same price (Intel 16-inch was still listed on Apple India store before M1 Pro launch stock clearance).",
     "price_reference_urls": [
-      "https://www.smartprix.com/laptops/apple-macbook-pro-2020-z11b0008x-laptop-apple-ppd17rdqom4j",
-      "https://www.xcoder.co.in/product-page/13-inch-macbook-pro-apple-m1-chip-with-8-core-cpu-and-8-core-gpu"
+      "https://www.apple.com/in/shop/product/Z0XZ000QV/macbook-pro-16-inch-intel-core-i7-16gb-512gb",
+      "https://www.smartprix.com/laptops/apple-macbook-pro-16-inch-2019-mvvj2hna-laptop-ppd17rdqom4j"
     ]
   },
   {

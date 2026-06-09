@@ -15,11 +15,11 @@ from app.services.demo_catalog import load_demo_catalog
 
 
 def test_macbook_nbv_mid_life_with_researched_cost():
-    """2022 M1 MacBook Pro 16GB/512GB — Smartprix/Apple India price band, partial SLM."""
-    far = compute_slm_far(169900, date(2022, 1, 14), 5.0, as_of=FAR_AS_OF_DATE)
-    assert far["book_nbv_inr"] == 28049
-    assert far["residual_value_inr"] == 8495.0
-    assert far["accumulated_depreciation_inr"] == 141851
+    """2022 MacBook Pro 16-inch Intel Core i7 / 16GB/512GB — Apple India official price, partial SLM."""
+    far = compute_slm_far(199900, date(2022, 1, 14), 5.0, as_of=FAR_AS_OF_DATE)
+    assert far["book_nbv_inr"] == 33002
+    assert far["residual_value_inr"] == 9995.0
+    assert far["accumulated_depreciation_inr"] == 166898
     assert far["asset_age_years"] < 5
 
 
@@ -56,8 +56,8 @@ def test_load_demo_catalog_enriched():
     catalog = load_demo_catalog()
     assert len(catalog) == 6
     macbook = next(a for a in catalog if a["catalog_id"] == "macbook-004")
-    assert macbook["book_nbv_inr"] == 28049
-    assert macbook["original_cost_inr"] == 169900
+    assert macbook["book_nbv_inr"] == 33002
+    assert macbook["original_cost_inr"] == 199900
     assert macbook.get("far_price_basis")
     assert macbook.get("price_reference_urls")
     assert macbook["asset_number"] == "10000052"

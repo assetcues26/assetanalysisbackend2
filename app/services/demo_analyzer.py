@@ -118,7 +118,7 @@ _CLIMATE_REASONS: dict[tuple[str, str], str] = {
     ("coastal_humid", "hvac"):
         "ISHRAE guidelines: outdoor HVAC condenser coils in coastal India corrode "
         "2–3× faster than in dry climates, shortening effective life from 10 years "
-        "to 5–7 years and depressing resale values.",
+        "to 5-7 years and depressing resale values.",
     ("coastal_humid", "industrial"):
         "Coastal salt spray accelerates canopy and exhaust-stack rust on generators "
         "and industrial enclosures; buyers discount more than for dry-climate installs.",

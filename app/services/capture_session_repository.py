@@ -310,18 +310,19 @@ class CaptureSessionRepository:
             return data.read()
         return bytes(data)
 
-    def _try_lock_analyzing_sync(self, token: str, user_id: int) -> dict | None:
+    def _try_lock_analyzing_sync(self, token: str, user_id: int) -> tuple[dict | None, bool]:
+        """Return (session row, lock_acquired). lock_acquired is True only when this call set analyzing."""
         row = self._get_row_by_token_sync(token)
         if not row or row.get("user_id") != user_id:
-            return None
+            return None, False
         if row["status"] == "analyzing":
-            return row
+            return row, False
         if row["status"] == "completed":
-            return row
+            return row, False
         if row["status"] != "active":
-            return None
+            return None, False
         if (row.get("image_count") or 0) < self.settings.min_images:
-            return None
+            return None, False
 
         updated = (
             self._get_client()
@@ -332,8 +333,11 @@ class CaptureSessionRepository:
             .execute()
         )
         if updated.data:
-            return updated.data[0]
-        return self._get_row_by_token_sync(token)
+            return updated.data[0], True
+        refetched = self._get_row_by_token_sync(token)
+        if refetched and refetched["status"] == "analyzing":
+            return refetched, False
+        return refetched, False
 
     def _complete_session_sync(
         self,
@@ -466,14 +470,20 @@ class CaptureSessionRepository:
     ) -> tuple[SessionDetailResponse | None, str | None]:
         """Returns (detail, error_message). Runs analyzer when lock acquired."""
 
-        row = await asyncio.to_thread(self._try_lock_analyzing_sync, token, user_id)
+        row, lock_acquired = await asyncio.to_thread(
+            self._try_lock_analyzing_sync, token, user_id
+        )
         if not row:
             return None, "Session not found"
         if row["status"] == "completed" and row.get("entry_id"):
             images = await asyncio.to_thread(self._fetch_images, row["id"])
             return self._to_detail(row, images), None
-        if row["status"] == "analyzing" and not row.get("entry_id"):
-            # Another request may be in progress — caller polls
+        if (
+            not lock_acquired
+            and row["status"] == "analyzing"
+            and not row.get("entry_id")
+        ):
+            # Another request holds the lock — caller polls
             images = await asyncio.to_thread(self._fetch_images, row["id"])
             return self._to_detail(row, images), None
         if row["status"] != "analyzing":

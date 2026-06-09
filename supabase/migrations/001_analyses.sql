@@ -1,5 +1,5 @@
 -- Asset Lens analysis persistence (demo user_id = 100)
--- Run in Supabase SQL Editor for project hsqmxygtelkcqfknzchq
+-- Run in Supabase SQL Editor for project byftlfblysvlmqpcqfnu
 
 CREATE TABLE IF NOT EXISTS analyses (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -32,7 +32,7 @@ def main() -> int:
         return 1
 
     conn = psycopg2.connect(
-        host="db.hsqmxygtelkcqfknzchq.supabase.co",
+        host="db.byftlfblysvlmqpcqfnu.supabase.co",
         port=5432,
         dbname="postgres",
         user="postgres",

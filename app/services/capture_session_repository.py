@@ -350,6 +350,42 @@ class CaptureSessionRepository:
             "id", session_id
         ).eq("status", "analyzing").execute()
 
+    def _cancel_analysis_sync(
+        self,
+        *,
+        token: str,
+        user_id: int,
+        clear_images: bool = False,
+    ) -> SessionDetailResponse:
+        row = self._get_row_by_token_sync(token)
+        if not row or row.get("user_id") != user_id:
+            raise ValueError("Session not found")
+        if row["status"] == "completed":
+            raise ValueError("Session already completed")
+        if row["status"] == "expired":
+            raise ValueError("Session has expired")
+        if row["status"] == "analyzing":
+            self._unlock_session_sync(row["id"])
+            row["status"] = "active"
+        elif row["status"] != "active":
+            raise ValueError(f"Session is {row['status']}")
+
+        if clear_images:
+            while True:
+                images = self._fetch_images(row["id"])
+                if not images:
+                    row["image_count"] = 0
+                    break
+                self._delete_image_sync(
+                    token=token,
+                    user_id=user_id,
+                    image_id=images[0]["id"],
+                )
+            row = self._get_row_by_token_sync(token) or row
+
+        images = self._fetch_images(row["id"])
+        return self._to_detail(row, images)
+
     async def create_session(
         self,
         *,
@@ -404,6 +440,20 @@ class CaptureSessionRepository:
             token=token,
             user_id=user_id,
             image_id=image_id,
+        )
+
+    async def cancel_analysis(
+        self,
+        *,
+        token: str,
+        user_id: int,
+        clear_images: bool = False,
+    ) -> SessionDetailResponse:
+        return await asyncio.to_thread(
+            self._cancel_analysis_sync,
+            token=token,
+            user_id=user_id,
+            clear_images=clear_images,
         )
 
     async def analyze_session(

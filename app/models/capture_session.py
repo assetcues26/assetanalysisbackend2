@@ -50,3 +50,7 @@ class AnalyzeSessionResponse(BaseModel):
     status: str
     entry_id: str | None = None
     saved_to_db: bool = False
+
+
+class CancelSessionRequest(BaseModel):
+    clear_images: bool = False

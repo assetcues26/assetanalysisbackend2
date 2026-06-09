@@ -129,6 +129,23 @@ def test_analyze_session_completed(session_settings):
     assert response.json()["entry_id"] == entry_id
 
 
+def test_cancel_session_analysis(session_settings):
+    token = "c" * 32
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    mock_repo.cancel_analysis = AsyncMock(return_value=_session_detail(token, status="active"))
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: session_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    client = TestClient(app)
+
+    response = client.post(f"/v1/sessions/{token}/cancel", json={"clear_images": True})
+    assert response.status_code == 200
+    assert response.json()["status"] == "active"
+    mock_repo.cancel_analysis.assert_awaited_once()
+
+
 def test_analyze_session_analyzing(session_settings):
     token = "b" * 32
     mock_repo = MagicMock()

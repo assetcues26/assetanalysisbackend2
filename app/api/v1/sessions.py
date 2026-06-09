@@ -9,6 +9,7 @@ from app.api.v1.history import verify_demo_api_key
 from app.config import Settings, get_settings
 from app.models.capture_session import (
     AnalyzeSessionResponse,
+    CancelSessionRequest,
     CreateSessionRequest,
     CreateSessionResponse,
     SessionDetailResponse,
@@ -200,6 +201,37 @@ async def delete_session_image(
             token=token,
             user_id=settings.demo_user_id,
             image_id=image_id,
+        )
+    except ValueError as exc:
+        msg = str(exc)
+        if "not found" in msg.lower():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg) from exc
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=msg) from exc
+
+
+@router.post(
+    "/sessions/{token}/cancel",
+    response_model=SessionDetailResponse,
+    tags=["Sessions"],
+    dependencies=[Depends(verify_demo_api_key)],
+)
+async def cancel_session_analysis(
+    token: str,
+    body: CancelSessionRequest | None = None,
+    repo: CaptureSessionRepository = Depends(get_repo),
+    settings: Settings = Depends(get_settings),
+    rate_limiter: RateLimiter = Depends(get_session_rate_limiter),
+) -> SessionDetailResponse:
+    rate_limiter.check("sessions")
+    _require_sessions(repo)
+    if not is_valid_session_token(token):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid session token")
+    clear_images = bool(body and body.clear_images)
+    try:
+        return await repo.cancel_analysis(
+            token=token,
+            user_id=settings.demo_user_id,
+            clear_images=clear_images,
         )
     except ValueError as exc:
         msg = str(exc)

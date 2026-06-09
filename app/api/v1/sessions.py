@@ -1,5 +1,6 @@
 """Cross-device capture session API."""
 
+import structlog
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile, status
@@ -23,6 +24,7 @@ from app.services.rate_limiter import RateLimiter
 from app.utils.uploads import _finalize_image_bytes
 
 router = APIRouter()
+logger = structlog.get_logger()
 
 _session_rate_limiter: RateLimiter | None = None
 _analyzer: AssetAnalysisService | None = None
@@ -75,10 +77,22 @@ async def create_session(
 ) -> CreateSessionResponse:
     rate_limiter.check("sessions")
     _require_sessions(repo)
-    detail = await repo.create_session(
-        user_id=settings.demo_user_id,
-        processing_mode=body.processing_mode,
-    )
+    try:
+        detail = await repo.create_session(
+            user_id=settings.demo_user_id,
+            processing_mode=body.processing_mode,
+        )
+    except Exception as exc:
+        logger.exception("create_session_failed", error=str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Capture session database is not ready. "
+                "Run backend/supabase/migrations SQL in your Supabase project, "
+                "create storage buckets analysis-images and capture-images, "
+                f"then redeploy. ({exc})"
+            ),
+        ) from exc
     return CreateSessionResponse(
         session_token=detail.session_token,
         status=detail.status,

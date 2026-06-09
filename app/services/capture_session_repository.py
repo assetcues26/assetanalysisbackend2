@@ -104,6 +104,20 @@ class CaptureSessionRepository:
             row["status"] = "expired"
         return row
 
+    def _recover_stale_analyzing_sync(self, row: dict) -> dict:
+        if row.get("status") != "analyzing" or row.get("entry_id"):
+            return row
+        updated = self._parse_ts(row.get("updated_at"))
+        if not updated:
+            return row
+        stale_after = timedelta(seconds=self.settings.capture_session_analyze_stale_seconds)
+        if datetime.now(timezone.utc) - updated <= stale_after:
+            return row
+        logger.warning("session_analyze_stale_unlock", session_id=row.get("id"))
+        self._unlock_session_sync(row["id"])
+        row["status"] = "active"
+        return row
+
     def _fetch_images(self, session_id: str) -> list[dict]:
         result = (
             self._get_client()
@@ -158,7 +172,8 @@ class CaptureSessionRepository:
         )
         if not result.data:
             return None
-        return self._expire_if_needed(result.data[0])
+        row = self._expire_if_needed(result.data[0])
+        return self._recover_stale_analyzing_sync(row)
 
     def _create_sync(
         self,

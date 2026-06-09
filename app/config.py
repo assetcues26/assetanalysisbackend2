@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     gemini_max_retries: int = 2
     # 0 = no hard cap on Gemini call duration (wait_for disabled)
     gemini_timeout_seconds: int = 30
-    gemini_hard_timeout_seconds: int = 0
+    gemini_hard_timeout_seconds: int = 55
 
     # 0 = do not log slow-request warnings against a target
     analysis_target_ms: int = 0
@@ -73,6 +73,7 @@ class Settings(BaseSettings):
     # Cross-device capture sessions (requires Supabase)
     capture_session_enabled: bool = False
     capture_session_ttl_hours: int = 2
+    capture_session_analyze_stale_seconds: int = 90
     capture_storage_bucket: str = "capture-images"
     session_rate_limit_per_minute: int = 120
     frontend_base_url: str = ""

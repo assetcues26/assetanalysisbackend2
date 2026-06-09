@@ -2,9 +2,23 @@
 name = "assetcuesassetanalysis-api"
 version = "1.0.0"
 requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.12",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    "google-genai>=1.0.0",
+    "Pillow>=11.0.0",
+    "numpy>=2.0.0",
+    "structlog>=24.4.0",
+    "prometheus-client>=0.21.0",
+    "httpx>=0.28.0",
+    "supabase>=2.10.0",
+]
 
 [tool.vercel]
-entrypoint = "app.main:app"
+entrypoint = "index:app"
 
 [tool.uvicorn]
 app = "app.main:app"

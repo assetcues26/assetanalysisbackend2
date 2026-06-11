@@ -129,6 +129,44 @@ def test_analyze_session_completed(session_settings):
     assert response.json()["entry_id"] == entry_id
 
 
+def test_analyze_session_passes_market_region(session_settings):
+    token = "d" * 32
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    entry_id = str(uuid.uuid4())
+    mock_repo.analyze_session = AsyncMock(
+        return_value=(
+            SessionDetailResponse(
+                session_token=token,
+                status="completed",
+                processing_mode="direct",
+                image_count=1,
+                max_images=10,
+                total_bytes=0,
+                entry_id=entry_id,
+                expires_at="2026-12-31T00:00:00Z",
+                images=[],
+            ),
+            None,
+        )
+    )
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: session_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    app.dependency_overrides[get_analyzer] = lambda: MagicMock()
+    client = TestClient(app)
+
+    response = client.post(
+        f"/v1/sessions/{token}/analyze",
+        data={"market_region": "GB", "locale": "en-GB"},
+    )
+    assert response.status_code == 200
+    mock_repo.analyze_session.assert_awaited_once()
+    call_kwargs = mock_repo.analyze_session.await_args.kwargs
+    assert call_kwargs.get("market_region") == "GB"
+
+
 def test_cancel_session_analysis(session_settings):
     token = "c" * 32
     mock_repo = MagicMock()

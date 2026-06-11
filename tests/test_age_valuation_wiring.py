@@ -4,6 +4,7 @@ from app.models.responses import AssetDetails, ConditionReport, LLMAnalysisResul
 from app.services.identity_validator import IdentityValidationResult
 from app.services.nbv_engine import apply_nbv_proxy
 from app.services.valuation_engine import compute_valuation
+from tests.market_fixtures import IN_MARKET
 
 
 def test_valuation_uses_asset_model_years_when_llm_omits_them():
@@ -32,11 +33,12 @@ def test_valuation_uses_asset_model_years_when_llm_omits_them():
         llm,
         ConditionReport(overall_score=95),
         identity,
-        usd_to_inr=83.0,
+        usd_to_display=83.0,
+        market=IN_MARKET,
         valuation_confidence_min=0.75,
         asset=asset,
     )
     assert val.as_is.usd.min is not None
-    val = apply_nbv_proxy(val, llm, usd_to_inr=83.0, asset=asset)
+    val = apply_nbv_proxy(val, llm, usd_to_display=83.0, market=IN_MARKET, asset=asset)
     assert val.nbv is not None
     assert val.nbv.age_years_used is not None

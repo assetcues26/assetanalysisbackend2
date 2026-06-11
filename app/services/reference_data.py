@@ -6,40 +6,46 @@ import json
 from pathlib import Path
 
 from app.config import Settings, get_settings
+from app.markets.registry import resolve_market
 
-_cache: dict[str, object] = {"path": None, "mtime": None, "data": None}
-
-
-def _default_path() -> Path:
-    return Path(__file__).resolve().parent.parent / "data" / "reference_prices.json"
+_cache: dict[str, dict] = {}
 
 
-def resolve_reference_path(settings: Settings | None = None) -> Path:
+def _default_data_dir() -> Path:
+    return Path(__file__).resolve().parent.parent / "data"
+
+
+def resolve_reference_path(settings: Settings | None = None, market_region: str = "IN") -> Path:
     settings = settings or get_settings()
     raw = (settings.reference_prices_path or "").strip()
-    return Path(raw) if raw else _default_path()
+    if raw:
+        return Path(raw)
+    market = resolve_market(market_region, settings)
+    return _default_data_dir() / market.reference_filename
 
 
-def load_reference_data(settings: Settings | None = None) -> dict:
+def load_reference_data(settings: Settings | None = None, market_region: str = "IN") -> dict:
     """Cached JSON load; invalidates when file mtime changes."""
     settings = settings or get_settings()
-    path = resolve_reference_path(settings)
+    path = resolve_reference_path(settings, market_region)
     if not path.is_file():
         raise FileNotFoundError(f"Reference prices file not found: {path}")
 
+    cache_key = str(path)
     mtime = path.stat().st_mtime
-    if _cache["data"] is not None and _cache["path"] == str(path) and _cache["mtime"] == mtime:
-        return _cache["data"]  # type: ignore[return-value]
+    cached = _cache.get(cache_key)
+    if cached and cached.get("mtime") == mtime:
+        return cached["data"]
 
     with path.open(encoding="utf-8") as fh:
         data = json.load(fh)
 
-    _cache.update(path=str(path), mtime=mtime, data=data)
+    _cache[cache_key] = {"mtime": mtime, "data": data}
     return data
 
 
-def valuation_rules(data: dict | None = None) -> dict:
-    data = data or load_reference_data()
+def valuation_rules(data: dict | None = None, settings: Settings | None = None, market_region: str = "IN") -> dict:
+    data = data or load_reference_data(settings, market_region)
     rules = data.get("valuation_rules") or {}
     return {
         "severity_multipliers": rules.get(
@@ -63,10 +69,10 @@ def valuation_rules(data: dict | None = None) -> dict:
     }
 
 
-def category_segment_keywords(data: dict | None = None) -> dict[str, list[str]]:
-    data = data or load_reference_data()
+def category_segment_keywords(data: dict | None = None, settings: Settings | None = None, market_region: str = "IN") -> dict[str, list[str]]:
+    data = data or load_reference_data(settings, market_region)
     return data.get("category_segment_keywords") or {}
 
 
-def reference_data_label(settings: Settings | None = None) -> str:
-    return resolve_reference_path(settings).name
+def reference_data_label(settings: Settings | None = None, market_region: str = "IN") -> str:
+    return resolve_reference_path(settings, market_region).name

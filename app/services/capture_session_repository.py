@@ -473,6 +473,7 @@ class CaptureSessionRepository:
         user_id: int,
         analyzer: AssetAnalysisService,
         locale: str | None = None,
+        market_region: str | None = None,
     ) -> tuple[SessionDetailResponse | None, str | None]:
         """Returns (detail, error_message). Runs analyzer when lock acquired."""
 
@@ -525,6 +526,7 @@ class CaptureSessionRepository:
                 files=files,
                 method=method,
                 locale=locale,
+                market_region=market_region,
                 processing_mode=mode,
                 api_route=api_route,
             )

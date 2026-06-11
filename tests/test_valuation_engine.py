@@ -3,6 +3,7 @@
 from app.models.responses import ConditionReport, DamageItem, LLMAnalysisResult, LLMValuationInputs, ValuationStatus
 from app.services.identity_validator import IdentityValidationResult
 from app.services.valuation_engine import compute_valuation
+from tests.market_fixtures import IN_MARKET
 
 
 def _identity_ok() -> IdentityValidationResult:
@@ -29,7 +30,7 @@ def test_as_is_not_above_like_new():
         damage_items=[DamageItem(type="scratch", severity="minor")],
     )
     val = compute_valuation(
-        llm, condition, _identity_ok(), usd_to_inr=100.0, valuation_confidence_min=0.75
+        llm, condition, _identity_ok(), usd_to_display=100.0, market=IN_MARKET, valuation_confidence_min=0.75
     )
     assert val.status in (ValuationStatus.OK, ValuationStatus.INDICATIVE_ONLY)
     assert val.as_is.usd.max is not None
@@ -63,8 +64,8 @@ def test_as_is_decreases_with_severe_damage():
             DamageItem(type="dent", severity="severe"),
         ],
     )
-    mild_val = compute_valuation(llm, mild, _identity_ok(), usd_to_inr=100.0, valuation_confidence_min=0.75)
-    heavy_val = compute_valuation(llm, heavy, _identity_ok(), usd_to_inr=100.0, valuation_confidence_min=0.75)
+    mild_val = compute_valuation(llm, mild, _identity_ok(), usd_to_display=100.0, market=IN_MARKET, valuation_confidence_min=0.75)
+    heavy_val = compute_valuation(llm, heavy, _identity_ok(), usd_to_display=100.0, market=IN_MARKET, valuation_confidence_min=0.75)
     assert mild_val.as_is.usd.max is not None and heavy_val.as_is.usd.max is not None
     assert heavy_val.as_is.usd.max < mild_val.as_is.usd.max
 
@@ -80,7 +81,7 @@ def test_weak_identity_still_returns_ok_status_and_amounts():
     )
     condition = ConditionReport()
     identity = IdentityValidationResult(passed=False, identity_confidence=0.4, withheld_identity=True)
-    val = compute_valuation(llm, condition, identity, usd_to_inr=100.0, valuation_confidence_min=0.75)
+    val = compute_valuation(llm, condition, identity, usd_to_display=100.0, market=IN_MARKET, valuation_confidence_min=0.75)
     assert val.status == ValuationStatus.OK
     assert val.as_is.usd.min is not None
     assert val.as_is.usd.max is not None

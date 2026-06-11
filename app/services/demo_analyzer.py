@@ -32,7 +32,8 @@ from app.pipeline.preprocess import preprocess_images
 from app.services.analyzer import AssetAnalysisService
 from app.services.cost import compute_cost
 from app.services.field_merger import to_asset_details
-from app.services.fx import get_usd_to_inr
+from app.markets.registry import resolve_market
+from app.services.fx import get_fx_rate, get_usd_to_inr
 from app.services.gemini_v6_demo import GeminiV6DemoService
 from app.services.metrics import (
     IDENTITY_LOW_CONFIDENCE,
@@ -170,9 +171,14 @@ def apply_climate_adjustment(
     new_usd_max = round(usd.max * factor, 2) if usd and usd.max is not None else None
 
     from app.models.responses import MoneyRange, ValuationAmount
+    disp = valuation.as_is.display
+    new_disp_min = round(disp.min * factor, 2) if disp.min is not None else None
+    new_disp_max = round(disp.max * factor, 2) if disp.max is not None else None
     new_as_is = ValuationAmount(
         inr=MoneyRange(min=new_inr_min, max=new_inr_max),
         usd=MoneyRange(min=new_usd_min, max=new_usd_max),
+        display=MoneyRange(min=new_disp_min, max=new_disp_max),
+        display_currency=valuation.as_is.display_currency,
     )
     valuation = valuation.model_copy(update={"as_is": new_as_is})
     return valuation, discount_pct
@@ -328,6 +334,8 @@ def apply_demo_book_nbv(
     valuation.nbv = NbvEstimate(
         usd=MoneyRange(min=usd, max=usd),
         inr=MoneyRange(min=nbv_inr, max=nbv_inr),
+        display=MoneyRange(min=nbv_inr, max=nbv_inr),
+        display_currency="INR",
         method="erp_book_nbv",
         age_years_used=_years_since(acquisition_date),
         disclaimer="Book NBV from ERP input — accounting value on the books.",
@@ -393,17 +401,19 @@ class DemoAnalysisService:
         demo_verification = build_demo_verification(demo_context, llm, identifiers)
         confidence = AssetAnalysisService._build_confidence(llm)
 
-        fx = await get_usd_to_inr(self.settings)
+        market = resolve_market("IN", self.settings)
+        fx = await get_fx_rate(self.settings, market.fx_target)  # type: ignore[arg-type]
         valuation = compute_valuation(
             llm,
             condition,
             identity_result,
-            usd_to_inr=fx.rate,
+            usd_to_display=fx.rate,
+            market=market,
             valuation_confidence_min=self.settings.valuation_confidence_threshold,
             asset=asset,
             settings=self.settings,
         )
-        _segment = resolve_segment_for_asset(llm, self.settings)
+        _segment = resolve_segment_for_asset(llm, self.settings, market.region)
         valuation, climate_discount_pct = apply_climate_adjustment(valuation, demo_context, _segment)
         valuation = apply_demo_book_nbv(
             valuation,
@@ -411,7 +421,7 @@ class DemoAnalysisService:
             usd_to_inr=fx.rate,
             acquisition_date=demo_context.acquisition_date,
         )
-        valuation = apply_nbv_comparison(valuation)
+        valuation = apply_nbv_comparison(valuation, market)
 
         demo_verification = demo_verification.model_copy(
             update={

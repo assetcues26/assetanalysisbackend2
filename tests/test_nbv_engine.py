@@ -11,6 +11,7 @@ from app.models.responses import (
     MoneyRange,
 )
 from app.services.nbv_engine import apply_nbv_proxy
+from tests.market_fixtures import IN_MARKET
 
 
 def _base_valuation() -> Valuation:
@@ -37,8 +38,8 @@ def test_nbv_ignores_condition_score():
     )
     llm_heavy = llm_mild.model_copy(update={"condition_score": 40})
 
-    v1 = apply_nbv_proxy(_base_valuation(), llm_mild, usd_to_inr=100.0)
-    v2 = apply_nbv_proxy(_base_valuation(), llm_heavy, usd_to_inr=100.0)
+    v1 = apply_nbv_proxy(_base_valuation(), llm_mild, usd_to_display=100.0, market=IN_MARKET)
+    v2 = apply_nbv_proxy(_base_valuation(), llm_heavy, usd_to_display=100.0, market=IN_MARKET)
 
     assert v1.nbv is not None and v2.nbv is not None
     assert v1.nbv.usd.min == v2.nbv.usd.min
@@ -57,6 +58,6 @@ def test_nbv_unchanged_when_only_damage_items_differ():
             age_years_max=5,
         ),
     )
-    nbv = apply_nbv_proxy(_base_valuation(), llm, usd_to_inr=100.0)
+    nbv = apply_nbv_proxy(_base_valuation(), llm, usd_to_display=100.0, market=IN_MARKET)
     assert nbv.nbv is not None
     assert nbv.nbv.usd.min is not None

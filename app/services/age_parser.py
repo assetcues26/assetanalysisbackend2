@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from app.models.responses import AssetDetails, LLMAnalysisResult
 
@@ -30,7 +30,7 @@ class AssetAgeDisplay:
 
 
 def _current_year(now_year: int | None = None) -> int:
-    return now_year or datetime.now(UTC).year
+    return now_year or datetime.now(timezone.utc).year
 
 
 def extract_model_year_bounds(

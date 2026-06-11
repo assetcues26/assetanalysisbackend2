@@ -18,6 +18,7 @@ from app.services.identity_validator import validate_identity
 from app.services.repair_policy import build_repair_plan
 from app.services.nbv_engine import apply_nbv_comparison, apply_nbv_proxy
 from app.services.valuation_engine import compute_valuation
+from tests.market_fixtures import IN_MARKET
 
 _FIXTURES = Path(__file__).parent / "fixtures" / "golden" / "cases.json"
 
@@ -58,7 +59,7 @@ def test_golden_valuation_bounds(golden_cases):
         ]
         condition = ConditionReport(overall_score=case.get("condition_score"), damage_items=damages)
         identity = validate_identity(llm)
-        val = compute_valuation(llm, condition, identity, usd_to_inr=100.0, valuation_confidence_min=0.75)
+        val = compute_valuation(llm, condition, identity, usd_to_display=100.0, market=IN_MARKET, valuation_confidence_min=0.75)
         if val.as_is.usd.max is not None and val.like_new_reference.usd.max is not None:
             assert val.as_is.usd.max <= val.like_new_reference.usd.max, case["id"]
 
@@ -108,7 +109,7 @@ def test_golden_identity(golden_cases):
                 llm,
                 ConditionReport(),
                 result,
-                usd_to_inr=100.0,
+                usd_to_display=100.0, market=IN_MARKET,
                 valuation_confidence_min=0.75,
             )
             assert val.status == ValuationStatus.OK, case["id"]
@@ -145,7 +146,7 @@ def test_golden_nbv_exceeds_as_is(golden_cases):
         ]
         condition = ConditionReport(overall_score=case.get("condition_score"), damage_items=damages)
         identity = validate_identity(llm)
-        val = compute_valuation(llm, condition, identity, usd_to_inr=100.0, valuation_confidence_min=0.75)
-        val = apply_nbv_proxy(val, llm, usd_to_inr=100.0)
-        val = apply_nbv_comparison(val)
+        val = compute_valuation(llm, condition, identity, usd_to_display=100.0, market=IN_MARKET, valuation_confidence_min=0.75)
+        val = apply_nbv_proxy(val, llm, usd_to_display=100.0, market=IN_MARKET)
+        val = apply_nbv_comparison(val, IN_MARKET)
         assert val.nbv_exceeds_as_is == case["expect_nbv_exceeds_as_is"], case["id"]

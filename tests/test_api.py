@@ -254,7 +254,9 @@ def test_analyze_success_mocked(path, method):
     assert data["prompt_version"] == "v2"
     policy = data["analysis_policy"]
     assert policy["valuation_confidence_threshold"] == settings.valuation_confidence_threshold
-    assert policy["reference_prices_source"] == "reference_prices.json"
+    assert policy["reference_prices_source"] == "reference_prices_IN.json"
+    assert policy["market_region"] == "IN"
+    assert policy["display_currency"] == "INR"
     assert data["reasoning_summary"]["selected_identity_rationale"]
     assert len(data["reasoning_summary"]["identity_candidates"]) >= 1
     assert "stage_timings_ms" in data
@@ -296,3 +298,48 @@ def test_analyze_success_mocked(path, method):
     )
     assert cost["total_cost_inr"] == pytest.approx(cost["total_cost_usd"] * 100.0, rel=1e-6)
     assert cost["fx_source"] == "fixed_rate"
+
+
+def test_analyze_us_market_region():
+    settings = Settings(gemini_api_key="fake-key")
+    usage = TokenUsage(
+        input_tokens=8000,
+        output_tokens=2000,
+        total_tokens=10000,
+        image_tokens=6720,
+        text_tokens=1280,
+        images_sent_to_gemini=1,
+        per_image_token_budget=1120,
+        estimated_image_tokens=1120,
+    )
+    fx = FxResult(rate=1.0, source="fixed_rate", is_fallback=False, as_of=None)
+
+    with (
+        patch("app.api.v1.assets.get_settings", return_value=settings),
+        patch(
+            "app.services.gemini.GeminiService.analyze_images",
+            new=AsyncMock(return_value=(_mock_llm(), usage)),
+        ),
+        patch("app.services.analyzer.get_fx_rate", new=AsyncMock(return_value=fx)),
+        patch("app.services.analyzer.get_usd_to_inr", new=AsyncMock(return_value=fx)),
+    ):
+        client = TestClient(create_app())
+        imgs = [make_test_image((40, 80, 140))]
+        files = [("images", ("img0.jpg", imgs[0], "image/jpeg"))]
+        response = client.post(
+            "/v1/assets/analyze/multi",
+            files=files,
+            data={"market_region": "US"},
+        )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    policy = data["analysis_policy"]
+    assert policy["market_region"] == "US"
+    assert policy["display_currency"] == "USD"
+    assert policy["reference_prices_source"] == "reference_prices_US.json"
+
+    val = data["valuation"]
+    assert val["as_is"]["display_currency"] == "USD"
+    assert val["as_is"]["display"]["min"] is not None
+    assert val["as_is"]["inr"]["min"] is None

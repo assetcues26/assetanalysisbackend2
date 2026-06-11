@@ -236,6 +236,14 @@ See [.env.example](.env.example) for all settings.
 | `MEDIA_RESOLUTION_COLLAGE` / `MEDIA_RESOLUTION_MULTI` | `high` | Detail vs cost (low/medium/high) |
 | `GEMINI_INPUT_USD_PER_1M` / `GEMINI_OUTPUT_USD_PER_1M` | 0.25 / 1.50 | Pricing for cost calc |
 | `FX_ENABLED` / `USD_TO_INR_FALLBACK` | true / 86.0 | Live USD→INR + fallback |
+| `USD_TO_GBP_FALLBACK` | 0.79 | Fallback USD→GBP when FX API unavailable |
+| `MULTI_MARKET_ENABLED` | true | When `false`, all requests use India (`IN`) — instant rollback |
+
+### Multi-region valuation (IN / US / GB)
+
+Send `market_region` (`IN`, `US`, or `GB`) on analyze endpoints. Responses include `valuation.*.display` and `analysis_policy.display_currency`. India clients reading `valuation.as_is.inr` remain compatible.
+
+**Production rollback:** set `MULTI_MARKET_ENABLED=false` on the backend (Vercel env). No database migration required.
 
 ### Prompts
 

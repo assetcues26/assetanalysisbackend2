@@ -119,6 +119,11 @@ MULTI_FILE_OPENAPI = {
                             "default": "en",
                             "description": "Output language for Gemini response",
                         },
+                        "market_region": {
+                            "type": "string",
+                            "default": "IN",
+                            "description": "Market region for valuation: IN | US | GB",
+                        },
                     },
                 }
             }

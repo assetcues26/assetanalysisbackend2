@@ -27,8 +27,12 @@ def persist_settings():
     )
 
 
-def test_history_disabled_returns_503(client):
-    response = client.get("/v1/history")
+def test_history_disabled_returns_503():
+    disabled_settings = Settings(supabase_persist_enabled=False)
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: disabled_settings
+    test_client = TestClient(app)
+    response = test_client.get("/v1/history")
     assert response.status_code == 503
 
 

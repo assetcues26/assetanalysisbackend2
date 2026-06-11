@@ -1,0 +1,67 @@
+{
+  "category_baselines_usd": {
+    "consumer_electronics": { "min": 400, "max": 1200 },
+    "it_equipment": { "min": 500, "max": 1800 },
+    "industrial": { "min": 2000, "max": 25000 },
+    "furniture": { "min": 80, "max": 800 },
+    "vehicle": { "min": 3000, "max": 45000 },
+    "other": { "min": 100, "max": 500 },
+    "hvac": { "min": 250, "max": 900 }
+  },
+  "depreciation_annual_rate": {
+    "consumer_electronics": 0.22,
+    "it_equipment": 0.18,
+    "industrial": 0.10,
+    "furniture": 0.12,
+    "vehicle": 0.15,
+    "other": 0.14,
+    "hvac": 0.12
+  },
+  "brand_model_overrides_usd": {
+    "apple|iphone": { "min": 700, "max": 1400 },
+    "apple|macbook": { "min": 900, "max": 2500 },
+    "dell|latitude": { "min": 600, "max": 1400 },
+    "hp|elitebook": { "min": 550, "max": 1300 },
+    "lenovo|thinkpad": { "min": 600, "max": 1500 }
+  },
+  "category_segment_keywords": {
+    "consumer_electronics": ["phone", "mobile", "tablet", "smartphone"],
+    "it_equipment": ["laptop", "computer", "server", "it", "notebook", "ultrabook"],
+    "industrial": ["machine", "industrial", "equipment", "tool", "cnc", "press"],
+    "furniture": ["furniture", "chair", "desk", "cabinet"],
+    "vehicle": ["vehicle", "car", "truck", "van", "forklift"],
+    "hvac": ["hvac", "air conditioner", "ac unit", "split ac", "air conditioning"],
+    "other": ["appliance"]
+  },
+  "valuation_rules": {
+    "severity_multipliers": {
+      "minor": 0.98,
+      "moderate": 0.92,
+      "severe": 0.80,
+      "unknown": 0.95
+    },
+    "segment_min_condition_multiplier": {
+      "vehicle": 0.40,
+      "industrial": 0.35,
+      "it_equipment": 0.20,
+      "consumer_electronics": 0.20,
+      "hvac": 0.30,
+      "furniture": 0.35,
+      "other": 0.25
+    },
+    "as_is_band_pct": 0.08,
+    "nbv_band_pct": 0.06,
+    "functional_issues_multiplier": 0.85,
+    "min_condition_score_factor": 0.5,
+    "min_condition_multiplier": 0.25,
+    "max_condition_multiplier": 1.0,
+    "age_multiplier_when_unknown": 0.85,
+    "min_age_multiplier": 0.35,
+    "like_new_hint_band_pct": 0.05,
+    "as_is_floor_ratio": 0.92,
+    "weak_identity_confidence_cap": 0.45,
+    "generation_ambiguous_confidence_cap": 0.65,
+    "missing_age_confidence_cap": 0.6,
+    "default_valuation_confidence": 0.7
+  }
+}

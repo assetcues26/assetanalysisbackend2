@@ -45,6 +45,7 @@ async def _run_analysis(
     images: list[UploadFile],
     method: UnifiedViewMethod,
     locale: str,
+    market_region: str,
     settings: Settings,
     rate_limiter: RateLimiter,
     analyzer: AssetAnalysisService,
@@ -70,6 +71,7 @@ async def _run_analysis(
                 files=files,
                 method=method,
                 locale=locale,
+                market_region=market_region,
                 processing_mode=processing_mode,
                 api_route=api_route,
             )
@@ -107,6 +109,7 @@ async def _run_analysis(
 async def analyze_collage(
     images: Annotated[list[UploadFile], File(description="1-10 asset photos")],
     locale: Annotated[str, Form(description="Output language")] = "en-IN",
+    market_region: Annotated[str, Form(description="Market region: IN | US | GB")] = "IN",
     processing_mode: Annotated[
         str | None, Form(description="Frontend processing mode: collage | direct")
     ] = None,
@@ -118,6 +121,7 @@ async def analyze_collage(
         images,
         UnifiedViewMethod.COLLAGE,
         locale,
+        market_region,
         settings,
         rate_limiter,
         analyzer,
@@ -141,6 +145,7 @@ async def analyze_collage(
 async def analyze_multi(
     images: Annotated[list[UploadFile], File(description="1-10 asset photos")],
     locale: Annotated[str, Form(description="Output language")] = "en-IN",
+    market_region: Annotated[str, Form(description="Market region: IN | US | GB")] = "IN",
     processing_mode: Annotated[
         str | None, Form(description="Frontend processing mode: collage | direct")
     ] = None,
@@ -152,6 +157,7 @@ async def analyze_multi(
         images,
         UnifiedViewMethod.MULTI_IMAGE,
         locale,
+        market_region,
         settings,
         rate_limiter,
         analyzer,

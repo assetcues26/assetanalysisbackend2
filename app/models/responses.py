@@ -178,11 +178,15 @@ class MoneyRange(BaseModel):
 class ValuationAmount(BaseModel):
     usd: MoneyRange = Field(default_factory=MoneyRange)
     inr: MoneyRange = Field(default_factory=MoneyRange)
+    display: MoneyRange = Field(default_factory=MoneyRange)
+    display_currency: str = "INR"
 
 
 class NbvEstimate(BaseModel):
     usd: MoneyRange = Field(default_factory=MoneyRange)
     inr: MoneyRange = Field(default_factory=MoneyRange)
+    display: MoneyRange = Field(default_factory=MoneyRange)
+    display_currency: str = "INR"
     method: str = "age_derived_proxy"
     age_years_used: Optional[float] = None
     depreciation_rate_used: Optional[float] = None

@@ -35,9 +35,13 @@ class Settings(BaseSettings):
     fx_cache_ttl_seconds: int = 3600
     fx_timeout_seconds: float = 4.0
     usd_to_inr_fallback: float = 83.0
+    usd_to_gbp_fallback: float = 0.79
 
     # Valuation tables (JSON). Override path to hot-swap without redeploying code.
     reference_prices_path: str = ""
+
+    # Multi-market valuation (IN / US / GB). Set false for instant rollback to India-only.
+    multi_market_enabled: bool = True
 
     rate_limit_per_minute: int = 60
     gemini_max_retries: int = 2

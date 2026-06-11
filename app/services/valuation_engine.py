@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.config import Settings, get_settings
+from app.markets.registry import MarketConfig, currency_note_for_market
 from app.models.responses import (
     AssetDetails,
     ConditionReport,
@@ -15,13 +16,13 @@ from app.models.responses import (
 )
 from app.services.age_parser import midpoint_years, resolve_asset_age
 from app.services.identity_validator import IdentityValidationResult
-from app.services.reference_data import load_reference_data, valuation_rules
+from app.services.reference_data import load_reference_data, reference_data_label, valuation_rules
 
 
-def resolve_segment_for_asset(llm: LLMAnalysisResult, settings: Settings | None = None) -> str:
+def resolve_segment_for_asset(llm: LLMAnalysisResult, settings: Settings | None = None, market_region: str = "IN") -> str:
     """Public convenience wrapper — resolves segment without requiring a pre-loaded data dict."""
     settings = settings or get_settings()
-    data = load_reference_data(settings)
+    data = load_reference_data(settings, market_region)
     return _resolve_segment(llm, data)
 
 
@@ -56,14 +57,7 @@ def _reference_like_new_usd(llm: LLMAnalysisResult, data: dict, segment: str, ru
 
 
 def _cap_condition_adjustment(adj_pct: float, segment: str) -> float:
-    """Clamp condition_adjustment_pct to segment-specific max deduction.
-
-    Research basis (India market):
-      vehicle      — cosmetic-only max -15%; structural max -35%
-      industrial   — severe functional max -40%
-      it_equipment — screen crack / severe max -55%
-      other        — conservative -50%
-    """
+    """Clamp condition_adjustment_pct to segment-specific max deduction."""
     floors = {
         "vehicle": -35.0,
         "industrial": -40.0,
@@ -80,7 +74,6 @@ def _cap_condition_adjustment(adj_pct: float, segment: str) -> float:
 def _condition_multiplier(condition: ConditionReport, llm: LLMAnalysisResult, rules: dict, segment: str = "other") -> float:
     severity_mult = rules["severity_multipliers"]
 
-    # 1. Damage-item severity — skip items marked acceptable_wear (cosmetic normal wear)
     severity_factor = 1.0
     for item in condition.damage_items:
         if getattr(item, "acceptable_wear", False):
@@ -88,20 +81,16 @@ def _condition_multiplier(condition: ConditionReport, llm: LLMAnalysisResult, ru
         sev = (item.severity or "").strip().lower() or "unknown"
         severity_factor *= float(severity_mult.get(sev, severity_mult.get("unknown", 0.95)))
 
-    # 2. AI condition_adjustment_pct — authoritative single-shot adjustment from LLM
     adj_factor = 1.0
     has_adj_pct = llm.valuation_inputs and llm.valuation_inputs.condition_adjustment_pct is not None
     if has_adj_pct:
         adj = _cap_condition_adjustment(llm.valuation_inputs.condition_adjustment_pct, segment)
         adj_factor = max(0.1, 1.0 + (adj / 100.0))
 
-    # 3. Functional issues — only when NOT already covered by condition_adjustment_pct
     func_factor = 1.0
     if condition.functional_issues and not has_adj_pct:
         func_factor = float(rules["functional_issues_multiplier"])
 
-    # 4. Overall score — skip when condition_adjustment_pct is already provided to avoid
-    #    double-counting the same damage signal (score and pct both encode condition).
     score_factor = 1.0
     if condition.overall_score is not None and not has_adj_pct:
         score_factor = max(
@@ -125,13 +114,21 @@ def _age_multiplier(segment: str, age_years: float | None, data: dict, rules: di
     return max(float(rules["min_age_multiplier"]), (1.0 - rate) ** age_years)
 
 
-def _amount(usd_min: float | None, usd_max: float | None, usd_to_inr: float) -> ValuationAmount:
+def _amount(
+    usd_min: float | None,
+    usd_max: float | None,
+    usd_to_display: float,
+    market: MarketConfig,
+) -> ValuationAmount:
+    display_min = round(usd_min * usd_to_display, 2) if usd_min is not None else None
+    display_max = round(usd_max * usd_to_display, 2) if usd_max is not None else None
+    inr_min = display_min if market.currency == "INR" else None
+    inr_max = display_max if market.currency == "INR" else None
     return ValuationAmount(
         usd=MoneyRange(min=usd_min, max=usd_max),
-        inr=MoneyRange(
-            min=round(usd_min * usd_to_inr, 2) if usd_min is not None else None,
-            max=round(usd_max * usd_to_inr, 2) if usd_max is not None else None,
-        ),
+        inr=MoneyRange(min=inr_min, max=inr_max),
+        display=MoneyRange(min=display_min, max=display_max),
+        display_currency=market.currency,
     )
 
 
@@ -140,7 +137,8 @@ def compute_valuation(
     condition: ConditionReport,
     identity: IdentityValidationResult,
     *,
-    usd_to_inr: float,
+    usd_to_display: float,
+    market: MarketConfig,
     valuation_confidence_min: float,
     asset: AssetDetails | None = None,
     settings: Settings | None = None,
@@ -148,7 +146,7 @@ def compute_valuation(
     settings = settings or get_settings()
     identity_weak = identity.withheld_identity or not identity.passed
 
-    data = load_reference_data(settings)
+    data = load_reference_data(settings, market.region)
     rules = valuation_rules(data)
     segment = _resolve_segment(llm, data)
     like_min, like_max = _reference_like_new_usd(llm, data, segment, rules)
@@ -177,7 +175,6 @@ def compute_valuation(
     if resolved_age is None and age_years is None:
         confidence = min(confidence, float(rules["missing_age_confidence_cap"]))
 
-    # Always return amounts with status ok — confidence and assumptions carry uncertainty.
     status = ValuationStatus.OK
     if identity.generation_ambiguous:
         confidence = min(confidence, float(rules["generation_ambiguous_confidence_cap"]))
@@ -192,19 +189,20 @@ def compute_valuation(
         assumptions = f"{weak_note} {assumptions}".strip() if assumptions else weak_note
     if not assumptions:
         assumptions = llm.valuation_assumptions
-    like_mid_inr = round(like_mid * usd_to_inr, 0)
+    like_mid_display = round(like_mid * usd_to_display, 0)
+    sym = market.currency_symbol
     if not assumptions:
         assumptions = (
             f"Segment={segment}; condition_mult={cond_mult:.2f}; age_mult={age_mult:.2f}; "
-            f"like_new_mid≈₹{like_mid_inr:,.0f}; age_years={age_years}; "
-            f"India market context; reference={settings.reference_prices_path or 'default'}."
+            f"like_new_mid≈{sym}{like_mid_display:,.0f}; age_years={age_years}; "
+            f"{market.market_label} market context; reference={reference_data_label(settings, market.region)}."
         )
 
     return Valuation(
         status=status,
-        as_is=_amount(as_is_min, as_is_max, usd_to_inr),
-        like_new_reference=_amount(like_min, like_max, usd_to_inr),
+        as_is=_amount(as_is_min, as_is_max, usd_to_display, market),
+        like_new_reference=_amount(like_min, like_max, usd_to_display, market),
         confidence=round(confidence, 3),
         assumptions=assumptions,
-        currency_note="All amounts in Indian Rupees (₹), estimated for the India market.",
+        currency_note=currency_note_for_market(market),
     )

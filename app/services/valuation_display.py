@@ -1,4 +1,4 @@
-"""Client-facing valuation shape (INR-only for India deployments)."""
+"""Client-facing valuation shape — display currency for regional deployments."""
 
 from __future__ import annotations
 
@@ -9,11 +9,15 @@ def _clear_usd(amount: ValuationAmount) -> ValuationAmount:
     return amount.model_copy(update={"usd": MoneyRange()})
 
 
+def _clear_nbv_usd(nbv: NbvEstimate) -> NbvEstimate:
+    return nbv.model_copy(update={"usd": MoneyRange()})
+
+
 def client_valuation(valuation: Valuation) -> Valuation:
-    """Strip USD amounts from API responses; clients see INR (₹) only."""
+    """Strip internal USD amounts; clients use display (+ inr for India backward compat)."""
     nbv = valuation.nbv
     if nbv is not None:
-        nbv = nbv.model_copy(update={"usd": MoneyRange()})
+        nbv = _clear_nbv_usd(nbv)
     return valuation.model_copy(
         update={
             "as_is": _clear_usd(valuation.as_is),

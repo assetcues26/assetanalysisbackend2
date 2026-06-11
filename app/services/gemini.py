@@ -9,6 +9,7 @@ from google.genai import types
 from PIL import Image
 
 from app.config import Settings
+from app.markets.registry import build_gemini_market_prompt, resolve_market
 from app.models.responses import LLMAnalysisResult, TokenUsage
 from app.pipeline.image_utils import image_to_bytes
 from app.prompts.loader import get_analysis_prompt
@@ -93,6 +94,7 @@ class GeminiService:
         locale: str = "en",
         image_labels: list[str] | None = None,
         total_images: int | None = None,
+        market_region: str = "IN",
     ) -> tuple[LLMAnalysisResult, TokenUsage]:
         if not self.is_configured():
             raise RuntimeError("Gemini API key is not configured")
@@ -121,11 +123,8 @@ class GeminiService:
             )
         if locale != "en":
             prompt += f"\n\nRespond in locale: {locale}."
-        prompt += (
-            "\n\nCLIENT MARKET: India. All valuation reasoning must reflect typical India retail "
-            "and used-asset prices (metros and tier-2 cities). Client-facing amounts are shown in "
-            "INR (₹) only — reason about value in rupees first, then map internal hints consistently."
-        )
+        market = resolve_market(market_region, self.settings)
+        prompt += build_gemini_market_prompt(market)
 
         parts = _build_image_parts(images, prompt, image_labels)
         config_kwargs: dict[str, Any] = {

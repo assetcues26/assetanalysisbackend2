@@ -244,6 +244,7 @@ async def cancel_session_analysis(
 async def analyze_session(
     token: str,
     locale: Annotated[str, Form(description="Output language")] = "en-IN",
+    market_region: Annotated[str, Form(description="Market region: IN | US | GB")] = "IN",
     repo: CaptureSessionRepository = Depends(get_repo),
     settings: Settings = Depends(get_settings),
     analyzer: AssetAnalysisService = Depends(get_analyzer),
@@ -259,6 +260,7 @@ async def analyze_session(
         user_id=settings.demo_user_id,
         analyzer=analyzer,
         locale=locale,
+        market_region=market_region,
     )
     if error and not detail:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error)

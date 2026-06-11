@@ -52,13 +52,18 @@ _MARKETS: dict[str, MarketConfig] = {
 
 
 def resolve_market(region: str | None, settings: Settings) -> MarketConfig:
-    """Resolve and validate market region; defaults to IN."""
+    """Resolve market region; falls back to Settings.market_region (MARKET_REGION env)."""
     if not settings.multi_market_enabled:
         return _MARKETS["IN"]
     raw = (region or settings.market_region or "IN").strip().upper()
     if raw not in SUPPORTED_REGIONS:
         return _MARKETS["IN"]
     return _MARKETS[raw]
+
+
+def default_market_region(settings: Settings) -> str:
+    """App-wide default region from MARKET_REGION env."""
+    return resolve_market(None, settings).region
 
 
 def build_gemini_market_prompt(market: MarketConfig) -> str:

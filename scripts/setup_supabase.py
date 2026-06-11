@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = [
     ROOT / "supabase" / "migrations" / "001_analyses.sql",
     ROOT / "supabase" / "migrations" / "002_capture_sessions.sql",
+    ROOT / "supabase" / "migrations" / "003_capture_sessions_market_region.sql",
 ]
 
 BUCKET_SQL = """

@@ -5,6 +5,10 @@ from pydantic import BaseModel, Field
 
 class CreateSessionRequest(BaseModel):
     processing_mode: str = Field(default="direct", pattern="^(collage|direct)$")
+    market_region: str | None = Field(
+        default=None,
+        description="Omit to use server default (MARKET_REGION env)",
+    )
 
 
 class SessionImageItem(BaseModel):
@@ -21,6 +25,7 @@ class CreateSessionResponse(BaseModel):
     session_token: str
     status: str
     processing_mode: str
+    market_region: str = "IN"
     image_count: int = 0
     expires_at: str
     images: list[SessionImageItem] = Field(default_factory=list)
@@ -30,6 +35,7 @@ class SessionDetailResponse(BaseModel):
     session_token: str
     status: str
     processing_mode: str
+    market_region: str = "IN"
     image_count: int
     max_images: int
     total_bytes: int = 0

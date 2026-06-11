@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any
 import structlog
 
 from app.config import Settings
+from app.markets.registry import SUPPORTED_REGIONS, resolve_market
 from app.models.capture_session import SessionDetailResponse, SessionImageItem
 from app.models.responses import UnifiedViewMethod
 from app.utils.uploads import UploadTuple
@@ -26,6 +27,23 @@ _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{20,128}$")
 
 def is_valid_session_token(token: str) -> bool:
     return bool(token and _TOKEN_RE.match(token.strip()))
+
+
+def resolve_session_market_region(
+    row: dict,
+    client_region: str | None = None,
+    *,
+    default_region: str = "IN",
+) -> str:
+    """Prefer market region stored on the session (laptop QR origin)."""
+    stored = (row.get("market_region") or "").strip().upper()
+    if stored in SUPPORTED_REGIONS:
+        return stored
+    client = (client_region or "").strip().upper()
+    if client in SUPPORTED_REGIONS:
+        return client
+    fallback = (default_region or "IN").strip().upper()
+    return fallback if fallback in SUPPORTED_REGIONS else "IN"
 
 
 class CaptureSessionRepository:
@@ -159,6 +177,9 @@ class CaptureSessionRepository:
             session_token=row["session_token"],
             status=row["status"],
             processing_mode=row.get("processing_mode") or "direct",
+            market_region=resolve_session_market_region(
+                row, default_region=self.settings.market_region
+            ),
             image_count=row.get("image_count") or len(images),
             max_images=self.settings.max_images,
             total_bytes=self._session_total_bytes(images),
@@ -186,16 +207,19 @@ class CaptureSessionRepository:
         *,
         user_id: int,
         processing_mode: str,
+        market_region: str = "IN",
     ) -> SessionDetailResponse:
         token = secrets.token_urlsafe(32)
         expires_at = datetime.now(timezone.utc) + timedelta(
             hours=self.settings.capture_session_ttl_hours
         )
+        region = resolve_market(market_region, self.settings).region
         row = {
             "session_token": token,
             "user_id": user_id,
             "status": "active",
             "processing_mode": processing_mode,
+            "market_region": region,
             "image_count": 0,
             "expires_at": expires_at.isoformat(),
         }
@@ -401,11 +425,13 @@ class CaptureSessionRepository:
         *,
         user_id: int,
         processing_mode: str,
+        market_region: str = "IN",
     ) -> SessionDetailResponse:
         return await asyncio.to_thread(
             self._create_sync,
             user_id=user_id,
             processing_mode=processing_mode,
+            market_region=market_region,
         )
 
     async def get_session(self, *, token: str, user_id: int) -> SessionDetailResponse | None:
@@ -501,6 +527,14 @@ class CaptureSessionRepository:
             await asyncio.to_thread(self._unlock_session_sync, row["id"])
             return None, f"At least {self.settings.min_images} image required"
 
+        effective_region = resolve_session_market_region(
+            row,
+            market_region,
+            default_region=self.settings.market_region,
+        )
+        market = resolve_market(effective_region, self.settings)
+        effective_locale = locale or market.default_locale
+
         try:
             files: list[UploadTuple] = []
             for img in images:
@@ -525,8 +559,8 @@ class CaptureSessionRepository:
             response = await analyzer.analyze(
                 files=files,
                 method=method,
-                locale=locale,
-                market_region=market_region,
+                locale=effective_locale,
+                market_region=effective_region,
                 processing_mode=mode,
                 api_route=api_route,
             )

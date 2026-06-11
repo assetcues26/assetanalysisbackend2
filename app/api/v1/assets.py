@@ -6,6 +6,7 @@ import structlog
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
 from app.config import Settings, get_settings
+from app.markets.registry import resolve_market
 from app.models.responses import AnalyzeResponse, HealthResponse, UnifiedViewMethod
 from app.services.analyzer import AssetAnalysisService
 from app.services.gemini import GeminiService
@@ -108,8 +109,10 @@ async def _run_analysis(
 )
 async def analyze_collage(
     images: Annotated[list[UploadFile], File(description="1-10 asset photos")],
-    locale: Annotated[str, Form(description="Output language")] = "en-IN",
-    market_region: Annotated[str, Form(description="Market region: IN | US | GB")] = "IN",
+    locale: Annotated[str | None, Form(description="Output language")] = None,
+    market_region: Annotated[
+        str | None, Form(description="Market region: IN | US | GB (omit for MARKET_REGION env)")
+    ] = None,
     processing_mode: Annotated[
         str | None, Form(description="Frontend processing mode: collage | direct")
     ] = None,
@@ -117,11 +120,12 @@ async def analyze_collage(
     rate_limiter: RateLimiter = Depends(get_rate_limiter),
     analyzer: AssetAnalysisService = Depends(get_analyzer),
 ) -> AnalyzeResponse:
+    market = resolve_market(market_region, settings)
     return await _run_analysis(
         images,
         UnifiedViewMethod.COLLAGE,
-        locale,
-        market_region,
+        locale or market.default_locale,
+        market.region,
         settings,
         rate_limiter,
         analyzer,
@@ -144,8 +148,10 @@ async def analyze_collage(
 )
 async def analyze_multi(
     images: Annotated[list[UploadFile], File(description="1-10 asset photos")],
-    locale: Annotated[str, Form(description="Output language")] = "en-IN",
-    market_region: Annotated[str, Form(description="Market region: IN | US | GB")] = "IN",
+    locale: Annotated[str | None, Form(description="Output language")] = None,
+    market_region: Annotated[
+        str | None, Form(description="Market region: IN | US | GB (omit for MARKET_REGION env)")
+    ] = None,
     processing_mode: Annotated[
         str | None, Form(description="Frontend processing mode: collage | direct")
     ] = None,
@@ -153,11 +159,12 @@ async def analyze_multi(
     rate_limiter: RateLimiter = Depends(get_rate_limiter),
     analyzer: AssetAnalysisService = Depends(get_analyzer),
 ) -> AnalyzeResponse:
+    market = resolve_market(market_region, settings)
     return await _run_analysis(
         images,
         UnifiedViewMethod.MULTI_IMAGE,
-        locale,
-        market_region,
+        locale or market.default_locale,
+        market.region,
         settings,
         rate_limiter,
         analyzer,

@@ -36,11 +36,17 @@ def session_settings():
     )
 
 
-def _session_detail(token: str, status: str = "active", image_count: int = 0) -> SessionDetailResponse:
+def _session_detail(
+    token: str,
+    status: str = "active",
+    image_count: int = 0,
+    market_region: str = "IN",
+) -> SessionDetailResponse:
     return SessionDetailResponse(
         session_token=token,
         status=status,
         processing_mode="direct",
+        market_region=market_region,
         image_count=image_count,
         max_images=10,
         total_bytes=0,
@@ -83,6 +89,32 @@ def test_create_session_success(session_settings):
     assert response.json()["session_token"].startswith("test-token")
 
 
+def test_create_session_passes_market_region(session_settings):
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    mock_repo.create_session = AsyncMock(
+        return_value=_session_detail(
+            "test-token-abc123456789012345678901234",
+            market_region="US",
+        )
+    )
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: session_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    client = TestClient(app)
+
+    response = client.post(
+        "/v1/sessions",
+        json={"processing_mode": "direct", "market_region": "US"},
+    )
+    assert response.status_code == 200
+    assert response.json()["market_region"] == "US"
+    mock_repo.create_session.assert_awaited_once()
+    call_kwargs = mock_repo.create_session.await_args.kwargs
+    assert call_kwargs.get("market_region") == "US"
+
+
 def test_get_session_invalid_token(session_settings):
     mock_repo = MagicMock()
     mock_repo.enabled = True
@@ -107,6 +139,7 @@ def test_analyze_session_completed(session_settings):
                 session_token=token,
                 status="completed",
                 processing_mode="direct",
+                market_region="IN",
                 image_count=2,
                 max_images=10,
                 total_bytes=0,
@@ -140,6 +173,7 @@ def test_analyze_session_passes_market_region(session_settings):
                 session_token=token,
                 status="completed",
                 processing_mode="direct",
+                market_region="GB",
                 image_count=1,
                 max_images=10,
                 total_bytes=0,

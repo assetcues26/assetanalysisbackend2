@@ -14,6 +14,7 @@ from app.models.capture_session import (
     CreateSessionResponse,
     SessionDetailResponse,
 )
+from app.markets.registry import resolve_market
 from app.services.analyzer import AssetAnalysisService
 from app.services.capture_session_repository import (
     CaptureSessionRepository,
@@ -79,9 +80,11 @@ async def create_session(
     rate_limiter.check("sessions")
     _require_sessions(repo)
     try:
+        market = resolve_market(body.market_region, settings)
         detail = await repo.create_session(
             user_id=settings.demo_user_id,
             processing_mode=body.processing_mode,
+            market_region=market.region,
         )
     except Exception as exc:
         logger.exception("create_session_failed", error=str(exc))
@@ -93,6 +96,7 @@ async def create_session(
         session_token=detail.session_token,
         status=detail.status,
         processing_mode=detail.processing_mode,
+        market_region=detail.market_region,
         image_count=detail.image_count,
         expires_at=detail.expires_at,
         images=detail.images,
@@ -243,8 +247,10 @@ async def cancel_session_analysis(
 )
 async def analyze_session(
     token: str,
-    locale: Annotated[str, Form(description="Output language")] = "en-IN",
-    market_region: Annotated[str, Form(description="Market region: IN | US | GB")] = "IN",
+    locale: Annotated[str | None, Form(description="Output language")] = None,
+    market_region: Annotated[
+        str | None, Form(description="Market region: IN | US | GB (session stored region wins)")
+    ] = None,
     repo: CaptureSessionRepository = Depends(get_repo),
     settings: Settings = Depends(get_settings),
     analyzer: AssetAnalysisService = Depends(get_analyzer),

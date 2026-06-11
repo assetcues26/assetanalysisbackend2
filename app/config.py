@@ -2,7 +2,10 @@
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_SUPPORTED_MARKET_REGIONS = frozenset({"IN", "US", "GB"})
 
 
 class Settings(BaseSettings):
@@ -84,10 +87,16 @@ class Settings(BaseSettings):
     session_rate_limit_per_minute: int = 120
     frontend_base_url: str = ""
 
-    # India-first client defaults
+    # Client defaults (override via env without code changes)
     default_locale: str = "en-IN"
-    market_region: str = "IN"
+    market_region: str = "IN"  # MARKET_REGION=IN|US|GB
     display_currency: str = "INR"
+
+    @field_validator("market_region")
+    @classmethod
+    def _normalize_market_region(cls, value: str) -> str:
+        raw = (value or "IN").strip().upper()
+        return raw if raw in _SUPPORTED_MARKET_REGIONS else "IN"
 
     allowed_mime_types: tuple[str, ...] = (
         "image/jpeg",

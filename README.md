@@ -241,7 +241,9 @@ See [.env.example](.env.example) for all settings.
 
 ### Multi-region valuation (IN / US / GB)
 
-Send `market_region` (`IN`, `US`, or `GB`) on analyze endpoints. Responses include `valuation.*.display` and `analysis_policy.display_currency`. India clients reading `valuation.as_is.inr` remain compatible.
+Send `market_region` (`IN`, `US`, or `GB`) on analyze endpoints, or omit it to use the server default `MARKET_REGION` env (`IN` | `US` | `GB`). Cross-device capture sessions store the laptop’s region at QR creation. Responses include `valuation.*.display` and `analysis_policy.display_currency`. India clients reading `valuation.as_is.inr` remain compatible.
+
+**Frontend default:** set `VITE_DEFAULT_MARKET_REGION` on Vercel for the initial market picker value (user choice persists in `localStorage`).
 
 **Production rollback:** set `MULTI_MARKET_ENABLED=false` on the backend (Vercel env). No database migration required.
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import concurrent.futures
 import re
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
@@ -74,6 +75,51 @@ class HistoryRepository:
         except Exception as exc:
             logger.warning("signed_url_failed", path=storage_path, error=str(exc))
             return None
+
+    def _signed_urls_batch(self, paths: list[str]) -> dict[str, str]:
+        """Sign many storage paths in parallel."""
+        unique = list(dict.fromkeys(path for path in paths if path))
+        if not unique:
+            return {}
+
+        max_workers = min(len(unique), 10)
+        signed: dict[str, str] = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_path = {
+                executor.submit(self._signed_url, path): path for path in unique
+            }
+            for future in concurrent.futures.as_completed(future_to_path):
+                path = future_to_path[future]
+                try:
+                    url = future.result()
+                    if url:
+                        signed[path] = url
+                except Exception as exc:
+                    logger.warning("signed_url_batch_failed", path=path, error=str(exc))
+        return signed
+
+    def _first_image_paths_for_analyses(
+        self,
+        client: Any,
+        analysis_ids: list[str],
+    ) -> dict[str, str]:
+        if not analysis_ids:
+            return {}
+
+        images_result = (
+            client.table("analysis_images")
+            .select("analysis_id, storage_path, sort_order")
+            .in_("analysis_id", analysis_ids)
+            .order("sort_order")
+            .execute()
+        )
+        first_by_id: dict[str, str] = {}
+        for img in images_result.data or []:
+            analysis_id = img.get("analysis_id")
+            storage_path = img.get("storage_path")
+            if analysis_id and storage_path and analysis_id not in first_by_id:
+                first_by_id[analysis_id] = storage_path
+        return first_by_id
 
     def _upload_bytes(self, path: str, data: bytes, mime_type: str = "image/jpeg") -> None:
         storage = self._get_client().storage.from_(self._bucket())
@@ -279,23 +325,25 @@ class HistoryRepository:
         rows = result.data or []
         count = result.count if result.count is not None else len(rows)
 
-        items: list[HistoryListItem] = []
+        analysis_ids = [row["id"] for row in rows if row.get("id")]
+        first_image_paths = self._first_image_paths_for_analyses(client, analysis_ids)
+
+        preview_paths: list[str | None] = []
+        paths_to_sign: list[str] = []
         for row in rows:
-            preview_url = None
             analysis_id = row.get("id")
-            if analysis_id:
-                images = (
-                    client.table("analysis_images")
-                    .select("storage_path")
-                    .eq("analysis_id", analysis_id)
-                    .order("sort_order")
-                    .limit(1)
-                    .execute()
-                )
-                if images.data:
-                    preview_url = self._signed_url(images.data[0]["storage_path"])
-            if not preview_url and row.get("collage_path"):
-                preview_url = self._signed_url(row["collage_path"])
+            path = first_image_paths.get(analysis_id) if analysis_id else None
+            if not path and row.get("collage_path"):
+                path = row["collage_path"]
+            preview_paths.append(path)
+            if path:
+                paths_to_sign.append(path)
+
+        signed_urls = self._signed_urls_batch(paths_to_sign)
+
+        items: list[HistoryListItem] = []
+        for row, path in zip(rows, preview_paths):
+            preview_url = signed_urls.get(path) if path else None
 
             processed_at = row.get("processed_at")
             if isinstance(processed_at, datetime):

@@ -515,6 +515,32 @@ class SaasAssetsRepository:
         )
         return CreateAssetResponse(id=row["id"], assetid=row["assetid"], ai_status="analyzing")
 
+    async def register_asset(
+        self,
+        user_id: int,
+        metadata: dict[str, Any],
+    ) -> CreateAssetResponse:
+        """Create asset record without images; stays pending until photos + analyze."""
+        meta = dict(metadata)
+        validate_create_metadata(meta, require_asset_image=False)
+        row = await asyncio.to_thread(
+            self._create_asset_row_sync,
+            user_id,
+            meta,
+            None,
+            None,
+        )
+        await self.log_activity(
+            user_id,
+            "asset_created",
+            f"Asset {row.get('assetname') or row['assetid']} registered (awaiting photos)",
+            asset_id=row["id"],
+            assetname=row.get("assetname"),
+            assetid=row.get("assetid"),
+            ai_status="pending",
+        )
+        return CreateAssetResponse(id=row["id"], assetid=row["assetid"], ai_status="pending")
+
     async def set_ai_status(self, asset_id: str, status: str) -> None:
         await asyncio.to_thread(
             self._table("registered_assets").update({"ai_status": status}).eq("id", asset_id).execute

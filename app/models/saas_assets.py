@@ -133,6 +133,22 @@ class UpdateAssetRequest(BaseModel):
     acquisitiondate: str | None = None
 
 
+class RegisterAssetRequest(UpdateAssetRequest):
+    """Create asset metadata only — no images, no AI analysis until images are added."""
+
+    assetname: str
+    tagnumber: str
+    assetnumber: str
+    makemodelid: str
+    makemodelname: str
+    companyid: str
+    company: str
+    customerid: str
+    cost: str | float
+    acquisitiondate: str
+    assetclassname: str
+
+
 class UpdateAssetResponse(BaseModel):
     asset: SaasAssetSummary
 

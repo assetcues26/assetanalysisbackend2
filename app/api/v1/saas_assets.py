@@ -44,7 +44,7 @@ from app.models.saas_assets import (
     SaasAssetListResponse,
     SaasDashboardStats,
     SaveWebDraftRequest,
-    UpdateAssetRequest,
+    RegisterAssetRequest,
     UpdateAssetResponse,
     WebDraftItem,
     WebDraftListResponse,
@@ -485,6 +485,30 @@ async def create_asset(
     await repo.set_ai_status(result.id, "analyzing")
     background_tasks.add_task(_background_analyze, settings, result.id, settings.demo_user_id)
     return CreateAssetResponse(id=result.id, assetid=result.assetid, ai_status="analyzing")
+
+
+@router.post(
+    "/assets/register",
+    response_model=CreateAssetResponse,
+    dependencies=[Depends(verify_demo_api_key)],
+)
+async def register_asset(
+    body: RegisterAssetRequest,
+    repo: SaasAssetsRepository = Depends(get_repo),
+    settings: Settings = Depends(get_settings),
+    rate_limiter: RateLimiter = Depends(get_saas_rate_limiter),
+) -> CreateAssetResponse:
+    """Register asset metadata without photos. AI analysis runs after images are uploaded."""
+    rate_limiter.check("saas_assets")
+    _require_saas(repo)
+    metadata = body.model_dump(exclude_unset=True)
+    try:
+        return await repo.register_asset(settings.demo_user_id, metadata)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("saas_register_asset_failed", error=str(exc))
+        raise HTTPException(status_code=503, detail="Failed to register asset") from exc
 
 
 @router.patch(

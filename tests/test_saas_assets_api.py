@@ -31,7 +31,11 @@ def saas_settings():
 TEST_ASSET_ID = "a39b8e4a-3d87-48a9-aae0-cb24c7aa99cb"
 
 
-def _asset_summary(asset_id: str = TEST_ASSET_ID, ai_status: str = "pending") -> SaasAssetSummary:
+def _asset_summary(
+    asset_id: str = TEST_ASSET_ID,
+    ai_status: str = "pending",
+    asset_image_url: str | None = None,
+) -> SaasAssetSummary:
     return SaasAssetSummary(
         id=asset_id,
         assetid="AST-10001",
@@ -41,6 +45,7 @@ def _asset_summary(asset_id: str = TEST_ASSET_ID, ai_status: str = "pending") ->
         cost=125000.5,
         acquisitiondate="15-08-2023",
         ai_status=ai_status,
+        asset_image_url=asset_image_url,
     )
 
 
@@ -116,7 +121,10 @@ def test_analyze_asset_triggers_background(saas_settings):
     mock_repo = MagicMock()
     mock_repo.enabled = True
     mock_repo.get_asset = AsyncMock(
-        return_value=SaasAssetDetailResponse(asset=_asset_summary(), latest_analysis=None)
+        return_value=SaasAssetDetailResponse(
+            asset=_asset_summary(asset_image_url="https://example.com/asset.jpg"),
+            latest_analysis=None,
+        )
     )
     mock_repo.set_ai_status = AsyncMock()
 
@@ -344,7 +352,10 @@ def test_analyze_with_metadata_patch(saas_settings):
     mock_repo = MagicMock()
     mock_repo.enabled = True
     mock_repo.get_asset = AsyncMock(
-        return_value=SaasAssetDetailResponse(asset=_asset_summary(), latest_analysis=None)
+        return_value=SaasAssetDetailResponse(
+            asset=_asset_summary(asset_image_url="https://example.com/asset.jpg"),
+            latest_analysis=None,
+        )
     )
     mock_repo.set_ai_status = AsyncMock()
 
@@ -449,3 +460,20 @@ def test_upload_asset_images_from_session_token(saas_settings):
     mock_repo.apply_session_images_to_asset.assert_awaited_once()
     mock_repo.update_asset.assert_not_called()
     bg.assert_awaited_once()
+
+
+def test_analyze_asset_requires_photos(saas_settings):
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    mock_repo.get_asset = AsyncMock(
+        return_value=SaasAssetDetailResponse(asset=_asset_summary(), latest_analysis=None)
+    )
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: saas_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    client = TestClient(app)
+
+    response = client.post(f"/v1/saas/assets/{TEST_ASSET_ID}/analyze")
+    assert response.status_code == 400
+    assert "Upload asset photos" in response.json()["detail"]

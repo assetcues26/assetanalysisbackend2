@@ -9,8 +9,18 @@ import httpx
 import structlog
 
 from app.config import Settings
+from app.utils.uploads import sniff_image_mime
 
 logger = structlog.get_logger()
+
+
+def _resolve_image_mime(data: bytes, fallback: str) -> str:
+    return sniff_image_mime(data) or fallback
+
+
+def _filename_for_mime(mime: str, stem: str) -> str:
+    ext = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}.get(mime, ".jpg")
+    return f"{stem}{ext}"
 
 TEXT_FIELDS = (
     "assetid",
@@ -150,6 +160,11 @@ async def analyze_asset_with_tagging_ai(
     if not url:
         raise ValueError("TAGGING_AI_API_URL is not configured")
 
+    if not asset_image and not barcode_image:
+        raise ValueError(
+            "At least one image (assetimage or barcodeimage) is required for Tagging AI"
+        )
+
     data: dict[str, str] = {}
     for key in TEXT_FIELDS:
         value = metadata.get(key)
@@ -158,15 +173,35 @@ async def analyze_asset_with_tagging_ai(
 
     files: list[tuple[str, tuple[str, bytes, str]]] = []
     if asset_image:
-        files.append(("assetimage", ("asset.jpg", asset_image, asset_mime)))
+        resolved_asset_mime = _resolve_image_mime(asset_image, asset_mime)
+        files.append(
+            (
+                "assetimage",
+                (
+                    _filename_for_mime(resolved_asset_mime, "asset"),
+                    asset_image,
+                    resolved_asset_mime,
+                ),
+            )
+        )
     if barcode_image:
-        files.append(("barcodeimage", ("barcode.jpg", barcode_image, barcode_mime)))
+        resolved_barcode_mime = _resolve_image_mime(barcode_image, barcode_mime)
+        files.append(
+            (
+                "barcodeimage",
+                (
+                    _filename_for_mime(resolved_barcode_mime, "barcode"),
+                    barcode_image,
+                    resolved_barcode_mime,
+                ),
+            )
+        )
 
     started = time.perf_counter()
     timeout = httpx.Timeout(settings.tagging_ai_timeout_seconds, connect=10.0)
 
     async with httpx.AsyncClient(timeout=timeout) as client:
-        response = await client.post(url, data=data, files=files or None)
+        response = await client.post(url, data=data, files=files)
 
     elapsed = time.perf_counter() - started
     request_id = response.headers.get("X-Request-ID")

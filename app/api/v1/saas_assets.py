@@ -175,11 +175,27 @@ def _parse_metadata_form(
 
 
 async def _background_analyze(
-    settings: Settings, asset_id: str, user_id: int, metadata_patch: dict[str, Any] | None = None
+    settings: Settings,
+    asset_id: str,
+    user_id: int,
+    metadata_patch: dict[str, Any] | None = None,
+    *,
+    asset_image: bytes | None = None,
+    barcode_image: bytes | None = None,
+    asset_mime: str = "image/jpeg",
+    barcode_mime: str = "image/jpeg",
 ) -> None:
     repo = get_saas_assets_repository(settings)
     try:
-        await repo.run_analysis(user_id, asset_id, metadata_patch)
+        await repo.run_analysis(
+            user_id,
+            asset_id,
+            metadata_patch,
+            asset_image=asset_image,
+            barcode_image=barcode_image,
+            asset_mime=asset_mime,
+            barcode_mime=barcode_mime,
+        )
     except Exception as exc:
         logger.exception("saas_background_analyze_failed", asset_id=asset_id, error=str(exc))
         await repo.set_ai_status(asset_id, "error")
@@ -506,7 +522,17 @@ async def create_asset(
         raise HTTPException(status_code=503, detail="Failed to create asset") from exc
 
     await repo.set_ai_status(result.id, "analyzing")
-    background_tasks.add_task(_background_analyze, settings, result.id, settings.demo_user_id)
+    background_tasks.add_task(
+        _background_analyze,
+        settings,
+        result.id,
+        settings.demo_user_id,
+        None,
+        asset_image=asset_bytes,
+        barcode_image=barcode_bytes,
+        asset_mime=asset_mime,
+        barcode_mime=barcode_mime,
+    )
     return CreateAssetResponse(id=result.id, assetid=result.assetid, ai_status="analyzing")
 
 
@@ -662,7 +688,15 @@ async def upload_asset_images(
     if should_analyze:
         await repo.set_ai_status(str(asset_id), "analyzing")
         background_tasks.add_task(
-            _background_analyze, settings, str(asset_id), settings.demo_user_id, None
+            _background_analyze,
+            settings,
+            str(asset_id),
+            settings.demo_user_id,
+            None,
+            asset_image=asset_bytes,
+            barcode_image=barcode_bytes,
+            asset_mime=asset_mime,
+            barcode_mime=barcode_mime,
         )
         detail = await repo.get_asset(settings.demo_user_id, str(asset_id))
         if detail:
@@ -746,6 +780,11 @@ async def analyze_asset(
     detail = await repo.get_asset(settings.demo_user_id, str(asset_id))
     if not detail:
         raise HTTPException(status_code=404, detail="Asset not found")
+    if not detail.asset.asset_image_url and not detail.asset.barcode_image_url:
+        raise HTTPException(
+            status_code=400,
+            detail="Upload asset photos before running AI analysis",
+        )
     patch = body.metadata_patch if body else None
     await repo.set_ai_status(str(asset_id), "analyzing")
     background_tasks.add_task(

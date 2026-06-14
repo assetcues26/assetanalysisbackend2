@@ -28,6 +28,7 @@ from app.services.tagging_ai_client import (
     compute_ai_status,
     extract_summary_fields,
 )
+from app.utils.uploads import sniff_image_mime
 
 logger = structlog.get_logger()
 
@@ -579,14 +580,51 @@ class SaasAssetsRepository:
         )
 
     async def run_analysis(
-        self, user_id: int, asset_id: str, metadata_patch: dict[str, Any] | None = None
+        self,
+        user_id: int,
+        asset_id: str,
+        metadata_patch: dict[str, Any] | None = None,
+        *,
+        asset_image: bytes | None = None,
+        barcode_image: bytes | None = None,
+        asset_mime: str = "image/jpeg",
+        barcode_mime: str = "image/jpeg",
     ) -> str:
         return await asyncio.to_thread(
-            self._run_analysis_sync, user_id, asset_id, metadata_patch
+            self._run_analysis_sync,
+            user_id,
+            asset_id,
+            metadata_patch,
+            asset_image,
+            barcode_image,
+            asset_mime,
+            barcode_mime,
         )
 
+    def _download_image_bytes(self, path: str, *, attempts: int = 3) -> bytes:
+        last_exc: Exception | None = None
+        for attempt in range(attempts):
+            try:
+                data = self._download_bytes(path)
+                if data:
+                    return data
+            except Exception as exc:
+                last_exc = exc
+            if attempt + 1 < attempts:
+                time.sleep(0.4 * (attempt + 1))
+        if last_exc:
+            raise last_exc
+        raise RuntimeError(f"Empty download for {path}")
+
     def _run_analysis_sync(
-        self, user_id: int, asset_id: str, metadata_patch: dict[str, Any] | None = None
+        self,
+        user_id: int,
+        asset_id: str,
+        metadata_patch: dict[str, Any] | None = None,
+        asset_image: bytes | None = None,
+        barcode_image: bytes | None = None,
+        asset_mime: str = "image/jpeg",
+        barcode_mime: str = "image/jpeg",
     ) -> str:
         result = (
             self._table("registered_assets")
@@ -622,22 +660,50 @@ class SaasAssetsRepository:
         self._table("registered_assets").update({"ai_status": "analyzing"}).eq("id", asset_id).execute()
 
         metadata = self._row_to_metadata(row)
-        asset_bytes = None
-        barcode_bytes = None
-        if row.get("asset_image_path"):
+        asset_bytes = asset_image
+        barcode_bytes = barcode_image
+        resolved_asset_mime = asset_mime
+        resolved_barcode_mime = barcode_mime
+
+        if asset_bytes is None and row.get("asset_image_path"):
             try:
-                asset_bytes = self._download_bytes(row["asset_image_path"])
+                asset_bytes = self._download_image_bytes(row["asset_image_path"])
+                resolved_asset_mime = sniff_image_mime(asset_bytes) or asset_mime
             except Exception as exc:
                 logger.warning("saas_download_asset_image_failed", error=str(exc))
-        if row.get("barcode_image_path"):
+        if barcode_bytes is None and row.get("barcode_image_path"):
             try:
-                barcode_bytes = self._download_bytes(row["barcode_image_path"])
+                barcode_bytes = self._download_image_bytes(row["barcode_image_path"])
+                resolved_barcode_mime = sniff_image_mime(barcode_bytes) or barcode_mime
             except Exception as exc:
                 logger.warning("saas_download_barcode_image_failed", error=str(exc))
 
+        if not asset_bytes and not barcode_bytes:
+            message = "Asset image is required for AI analysis"
+            self._table("registered_assets").update({"ai_status": "error"}).eq("id", asset_id).execute()
+            self._table("asset_analyses").insert(
+                {
+                    "asset_id": asset_id,
+                    "user_id": user_id,
+                    "request_id": None,
+                    "response_json": {"error": message},
+                    "ai_status": "error",
+                    "failure_summary": {"error": message},
+                    "response_time_seconds": None,
+                }
+            ).execute()
+            return "error"
+
         try:
             response, request_id, elapsed = asyncio.run(
-                analyze_asset_with_tagging_ai(self.settings, metadata, asset_bytes, barcode_bytes)
+                analyze_asset_with_tagging_ai(
+                    self.settings,
+                    metadata,
+                    asset_bytes,
+                    barcode_bytes,
+                    asset_mime=resolved_asset_mime,
+                    barcode_mime=resolved_barcode_mime,
+                )
             )
         except Exception as exc:
             logger.exception("saas_tagging_ai_failed", asset_id=asset_id, error=str(exc))

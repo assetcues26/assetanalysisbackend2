@@ -1058,16 +1058,17 @@ class SaasAssetsRepository:
 
         return self._summary_from_row(row)
 
-    async def apply_session_images_to_asset(
+    async def load_session_images_for_asset(
         self, user_id: int, asset_id: str, session_token: str
-    ) -> SaasAssetSummary | None:
+    ) -> tuple[bytes, bytes | None]:
         return await asyncio.to_thread(
-            self._apply_session_images_to_asset_sync, user_id, asset_id, session_token
+            self._load_session_images_for_asset_sync, user_id, asset_id, session_token
         )
 
-    def _apply_session_images_to_asset_sync(
+    def _load_session_images_for_asset_sync(
         self, user_id: int, asset_id: str, session_token: str
-    ) -> SaasAssetSummary | None:
+    ) -> tuple[bytes, bytes | None]:
+        del user_id  # validated via asset_id match in session draft
         session = self._fetch_session_by_token_sync(session_token)
         if not session:
             raise ValueError("Session not found")
@@ -1089,7 +1090,21 @@ class SaasAssetsRepository:
             barcode_image = self._download_bytes(session["barcode_image_path"])
         if not asset_image:
             raise ValueError("Session has no asset image")
+        return asset_image, barcode_image
 
+    async def apply_session_images_to_asset(
+        self, user_id: int, asset_id: str, session_token: str
+    ) -> SaasAssetSummary | None:
+        return await asyncio.to_thread(
+            self._apply_session_images_to_asset_sync, user_id, asset_id, session_token
+        )
+
+    def _apply_session_images_to_asset_sync(
+        self, user_id: int, asset_id: str, session_token: str
+    ) -> SaasAssetSummary | None:
+        asset_image, barcode_image = self._load_session_images_for_asset_sync(
+            user_id, asset_id, session_token
+        )
         return self._update_asset_sync(
             user_id,
             asset_id,

@@ -633,7 +633,6 @@ async def upload_asset_images(
     asset_mime = "image/jpeg"
     barcode_bytes = None
     barcode_mime = "image/jpeg"
-    used_session = False
 
     try:
         asset_bytes, asset_mime = await _read_optional_upload(assetimage, "asset.jpg", settings)
@@ -643,36 +642,47 @@ async def upload_asset_images(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    if token and not asset_bytes and not barcode_bytes:
+    if token:
         if not is_valid_asset_session_token(token):
             raise HTTPException(status_code=400, detail="Invalid session token")
         try:
-            updated = await repo.apply_session_images_to_asset(
+            session_asset, session_barcode = await repo.load_session_images_for_asset(
                 settings.demo_user_id,
                 str(asset_id),
                 token,
             )
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
-        if not updated:
-            raise HTTPException(status_code=404, detail="Asset not found")
-        used_session = True
-    elif not asset_bytes and not barcode_bytes:
-        raise HTTPException(status_code=400, detail="Empty file upload")
-    elif not asset_bytes and not has_existing_asset_image:
-        raise HTTPException(status_code=400, detail="Asset image is required")
-    else:
-        updated = await repo.update_asset(
-            settings.demo_user_id,
-            str(asset_id),
-            {},
-            asset_image=asset_bytes,
-            barcode_image=barcode_bytes,
-            asset_mime=asset_mime,
-            barcode_mime=barcode_mime,
+        except SessionCompletedError as exc:
+            raise HTTPException(status_code=410, detail=str(exc)) from exc
+        except SessionExpiredError as exc:
+            raise HTTPException(status_code=410, detail=str(exc)) from exc
+        if not asset_bytes:
+            asset_bytes = session_asset
+            asset_mime = "image/jpeg"
+        if not barcode_bytes and session_barcode:
+            barcode_bytes = session_barcode
+            barcode_mime = "image/jpeg"
+
+    if not asset_bytes and not barcode_bytes:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide assetimage, barcodeimage, or session_token with synced photos",
         )
-        if not updated:
-            raise HTTPException(status_code=404, detail="Asset not found")
+    if not asset_bytes and not has_existing_asset_image:
+        raise HTTPException(status_code=400, detail="Asset image is required")
+
+    updated = await repo.update_asset(
+        settings.demo_user_id,
+        str(asset_id),
+        {},
+        asset_image=asset_bytes,
+        barcode_image=barcode_bytes,
+        asset_mime=asset_mime,
+        barcode_mime=barcode_mime,
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Asset not found")
 
     await repo.log_activity(
         settings.demo_user_id,
@@ -683,7 +693,7 @@ async def upload_asset_images(
         assetid=updated.assetid,
     )
 
-    got_asset_image = asset_bytes is not None or used_session or has_existing_asset_image
+    got_asset_image = asset_bytes is not None or has_existing_asset_image
     should_analyze = reanalyze and got_asset_image
     if should_analyze:
         await repo.set_ai_status(str(asset_id), "analyzing")

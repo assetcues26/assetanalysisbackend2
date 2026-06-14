@@ -28,6 +28,7 @@ from app.services.tagging_ai_client import (
     compute_ai_status,
     extract_summary_fields,
 )
+from app.utils.saas_image_compress import compress_image_bytes_for_tagging_ai
 from app.utils.uploads import sniff_image_mime
 
 logger = structlog.get_logger()
@@ -166,8 +167,9 @@ class SaasAssetsRepository:
             return None
 
     def _upload_bytes(self, path: str, data: bytes, mime_type: str = "image/jpeg") -> None:
+        prepared = compress_image_bytes_for_tagging_ai(data)
         storage = self._get_client().storage.from_(self._bucket())
-        storage.upload(path, data, {"content-type": mime_type, "upsert": "true"})
+        storage.upload(path, prepared, {"content-type": "image/jpeg", "upsert": "true"})
 
     def _download_bytes(self, path: str) -> bytes:
         return self._get_client().storage.from_(self._bucket()).download(path)
@@ -330,6 +332,8 @@ class SaasAssetsRepository:
             session_token=row["session_token"],
             status=row.get("status") or "active",
             draft_json=row.get("draft_json") or {},
+            asset_image_path=row.get("asset_image_path"),
+            barcode_image_path=row.get("barcode_image_path"),
             asset_image_url=self._signed_url(row.get("asset_image_path")),
             barcode_image_url=self._signed_url(row.get("barcode_image_path")),
             expires_at=self._iso(row.get("expires_at")),
@@ -1095,6 +1099,63 @@ class SaasAssetsRepository:
             "image/jpeg",
             "image/jpeg",
         )
+
+    async def delete_asset_image(
+        self, user_id: int, asset_id: str, image_kind: str
+    ) -> SaasAssetSummary | None:
+        return await asyncio.to_thread(
+            self._delete_asset_image_sync, user_id, asset_id, image_kind
+        )
+
+    def _delete_asset_image_sync(
+        self, user_id: int, asset_id: str, image_kind: str
+    ) -> SaasAssetSummary | None:
+        if image_kind not in ("asset", "barcode"):
+            raise ValueError("image_kind must be asset or barcode")
+
+        result = (
+            self._table("registered_assets")
+            .select("*")
+            .eq("id", asset_id)
+            .eq("user_id", user_id)
+            .limit(1)
+            .execute()
+        )
+        rows = result.data or []
+        if not rows:
+            return None
+        row = rows[0]
+
+        path_key = "asset_image_path" if image_kind == "asset" else "barcode_image_path"
+        storage_path = row.get(path_key)
+        if not storage_path:
+            return self._summary_from_row(row)
+
+        self._remove_storage_paths([storage_path])
+        self._signed_url_cache.pop(storage_path, None)
+
+        updates: dict[str, Any] = {path_key: None}
+        if image_kind == "asset":
+            updates["ai_status"] = "pending"
+
+        upd = (
+            self._table("registered_assets")
+            .update(updates)
+            .eq("id", asset_id)
+            .eq("user_id", user_id)
+            .execute()
+        )
+        updated_row = (upd.data or [row])[0]
+        label = "asset" if image_kind == "asset" else "barcode"
+        self._log_activity_sync(
+            user_id,
+            "photos_removed",
+            f"{label.title()} photo removed for {updated_row.get('assetname') or updated_row.get('assetid')}",
+            asset_id=asset_id,
+            assetname=updated_row.get("assetname"),
+            assetid=updated_row.get("assetid"),
+        )
+        return self._summary_from_row(updated_row)
 
     async def delete_asset(self, user_id: int, asset_id: str) -> bool:
         return await asyncio.to_thread(self._delete_asset_sync, user_id, asset_id)

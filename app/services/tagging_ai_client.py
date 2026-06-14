@@ -9,6 +9,7 @@ import httpx
 import structlog
 
 from app.config import Settings
+from app.utils.saas_image_compress import compress_image_bytes_for_tagging_ai
 from app.utils.uploads import sniff_image_mime
 
 logger = structlog.get_logger()
@@ -173,7 +174,8 @@ async def analyze_asset_with_tagging_ai(
 
     files: list[tuple[str, tuple[str, bytes, str]]] = []
     if asset_image:
-        resolved_asset_mime = _resolve_image_mime(asset_image, asset_mime)
+        asset_image = compress_image_bytes_for_tagging_ai(asset_image)
+        resolved_asset_mime = "image/jpeg"
         files.append(
             (
                 "assetimage",
@@ -185,7 +187,8 @@ async def analyze_asset_with_tagging_ai(
             )
         )
     if barcode_image:
-        resolved_barcode_mime = _resolve_image_mime(barcode_image, barcode_mime)
+        barcode_image = compress_image_bytes_for_tagging_ai(barcode_image)
+        resolved_barcode_mime = "image/jpeg"
         files.append(
             (
                 "barcodeimage",
@@ -206,7 +209,26 @@ async def analyze_asset_with_tagging_ai(
     elapsed = time.perf_counter() - started
     request_id = response.headers.get("X-Request-ID")
 
-    body = response.json()
+    raw_text = response.text or ""
+    if not raw_text.strip():
+        raise RuntimeError(
+            f"Tagging AI returned an empty response (HTTP {response.status_code}). "
+            "The service may be down or the request timed out."
+        )
+
+    try:
+        body = response.json()
+    except ValueError as exc:
+        preview = " ".join(raw_text.split())[:180]
+        if response.status_code == 413 or "too large" in preview.lower():
+            raise RuntimeError(
+                "Images are too large for Tagging AI. Re-upload smaller photos "
+                "(under 500KB each) and try again."
+            ) from exc
+        raise RuntimeError(
+            f"Tagging AI returned a non-JSON response (HTTP {response.status_code}): {preview}"
+        ) from exc
+
     if not response.is_success:
         message = body.get("error", {}).get("message") if isinstance(body, dict) else str(body)
         raise RuntimeError(message or f"Tagging AI HTTP {response.status_code}")

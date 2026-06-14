@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import structlog
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from uuid import UUID
 
@@ -702,6 +702,30 @@ async def upload_asset_images(
         if detail:
             return UpdateAssetResponse(asset=detail.asset)
 
+    return UpdateAssetResponse(asset=updated)
+
+
+@router.delete(
+    "/assets/{asset_id}/images",
+    response_model=UpdateAssetResponse,
+    dependencies=[Depends(verify_demo_api_key)],
+)
+async def delete_asset_image(
+    asset_id: UUID,
+    kind: Annotated[Literal["asset", "barcode"], Query(alias="kind")],
+    repo: SaasAssetsRepository = Depends(get_repo),
+    settings: Settings = Depends(get_settings),
+    rate_limiter: RateLimiter = Depends(get_saas_rate_limiter),
+) -> UpdateAssetResponse:
+    """Remove asset or barcode photo so a new image can be uploaded."""
+    rate_limiter.check("saas_assets")
+    _require_saas(repo)
+    try:
+        updated = await repo.delete_asset_image(settings.demo_user_id, str(asset_id), kind)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if not updated:
+        raise HTTPException(status_code=404, detail="Asset not found")
     return UpdateAssetResponse(asset=updated)
 
 

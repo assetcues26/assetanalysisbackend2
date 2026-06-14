@@ -477,3 +477,39 @@ def test_analyze_asset_requires_photos(saas_settings):
     response = client.post(f"/v1/saas/assets/{TEST_ASSET_ID}/analyze")
     assert response.status_code == 400
     assert "Upload asset photos" in response.json()["detail"]
+
+
+def test_delete_asset_image(saas_settings):
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    mock_repo.delete_asset_image = AsyncMock(
+        return_value=_asset_summary(ai_status="pending")
+    )
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: saas_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    client = TestClient(app)
+
+    response = client.delete(f"/v1/saas/assets/{TEST_ASSET_ID}/images?kind=asset")
+
+    assert response.status_code == 200
+    assert response.json()["asset"]["ai_status"] == "pending"
+    mock_repo.delete_asset_image.assert_awaited_once_with(
+        saas_settings.demo_user_id, TEST_ASSET_ID, "asset"
+    )
+
+
+def test_delete_asset_image_invalid_kind(saas_settings):
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    mock_repo.delete_asset_image = AsyncMock(side_effect=ValueError("image_kind must be asset or barcode"))
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: saas_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    client = TestClient(app)
+
+    response = client.delete(f"/v1/saas/assets/{TEST_ASSET_ID}/images?kind=invalid")
+
+    assert response.status_code == 422

@@ -88,6 +88,8 @@ class AssetCreateSessionDetail(BaseModel):
     session_token: str
     status: str
     draft_json: dict[str, Any] = Field(default_factory=dict)
+    asset_image_path: str | None = None
+    barcode_image_path: str | None = None
     asset_image_url: str | None = None
     barcode_image_url: str | None = None
     expires_at: str

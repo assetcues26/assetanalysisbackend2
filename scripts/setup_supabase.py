@@ -12,13 +12,17 @@ MIGRATIONS = [
     ROOT / "supabase" / "migrations" / "001_analyses.sql",
     ROOT / "supabase" / "migrations" / "002_capture_sessions.sql",
     ROOT / "supabase" / "migrations" / "003_capture_sessions_market_region.sql",
+    ROOT / "supabase" / "migrations" / "004_saas_assets.sql",
+    ROOT / "supabase" / "migrations" / "005_saas_public_tables.sql",
+    ROOT / "supabase" / "migrations" / "006_saas_extended.sql",
 ]
 
 BUCKET_SQL = """
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES
   ('analysis-images', 'analysis-images', false, 20971520, ARRAY['image/jpeg','image/png','image/webp']::text[]),
-  ('capture-images', 'capture-images', false, 20971520, ARRAY['image/jpeg','image/png','image/webp']::text[])
+  ('capture-images', 'capture-images', false, 20971520, ARRAY['image/jpeg','image/png','image/webp']::text[]),
+  ('saas-asset-images', 'saas-asset-images', false, 20971520, ARRAY['image/jpeg','image/png','image/webp']::text[])
 ON CONFLICT (id) DO UPDATE SET
   public = EXCLUDED.public,
   file_size_limit = EXCLUDED.file_size_limit,

@@ -87,6 +87,14 @@ class Settings(BaseSettings):
     session_rate_limit_per_minute: int = 120
     frontend_base_url: str = ""
 
+    # SaaS asset register module (isolated schema + Tagging AI proxy)
+    saas_assets_enabled: bool = False
+    saas_assets_storage_bucket: str = "saas-asset-images"
+    saas_asset_create_session_ttl_minutes: int = 30
+    saas_assets_rate_limit_per_minute: int = 120
+    tagging_ai_api_url: str = "https://taggingai.vercel.app/api/asset_analysis"
+    tagging_ai_timeout_seconds: int = 90
+
     # Client defaults (override via env without code changes)
     default_locale: str = "en-IN"
     market_region: str = "IN"  # MARKET_REGION=IN|US|GB

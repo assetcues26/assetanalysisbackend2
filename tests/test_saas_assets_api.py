@@ -413,3 +413,39 @@ def test_upload_asset_images_requires_asset_image_when_missing(saas_settings):
     )
     assert response.status_code == 400
     assert "Asset image is required" in response.json()["detail"]
+
+
+def test_upload_asset_images_from_session_token(saas_settings):
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    mock_repo.get_asset = AsyncMock(
+        return_value=SaasAssetDetailResponse(asset=_asset_summary(), latest_analysis=None)
+    )
+    mock_repo.apply_session_images_to_asset = AsyncMock(
+        return_value=_asset_summary(ai_status="analyzing")
+    )
+    mock_repo.log_activity = AsyncMock()
+    mock_repo.set_ai_status = AsyncMock()
+    mock_repo.get_asset.side_effect = [
+        SaasAssetDetailResponse(asset=_asset_summary(), latest_analysis=None),
+        SaasAssetDetailResponse(
+            asset=_asset_summary(ai_status="analyzing"),
+            latest_analysis=None,
+        ),
+    ]
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: saas_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    client = TestClient(app)
+
+    token = "a" * 32
+    with patch("app.api.v1.saas_assets._background_analyze", new_callable=AsyncMock) as bg:
+        response = client.post(
+            f"/v1/saas/assets/{TEST_ASSET_ID}/images?session_token={token}",
+        )
+
+    assert response.status_code == 200
+    mock_repo.apply_session_images_to_asset.assert_awaited_once()
+    mock_repo.update_asset.assert_not_called()
+    bg.assert_awaited_once()

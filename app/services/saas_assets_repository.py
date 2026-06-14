@@ -7,6 +7,7 @@ import csv
 import io
 import re
 import secrets
+import time
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any
@@ -100,6 +101,7 @@ class SaasAssetsRepository:
     def __init__(self, settings: Settings):
         self.settings = settings
         self._client: Any = None
+        self._signed_url_cache: dict[str, tuple[str, float]] = {}
 
     @property
     def enabled(self) -> bool:
@@ -140,6 +142,10 @@ class SaasAssetsRepository:
     def _signed_url(self, storage_path: str | None) -> str | None:
         if not storage_path:
             return None
+        now = time.monotonic()
+        cached = self._signed_url_cache.get(storage_path)
+        if cached and cached[1] > now:
+            return cached[0]
         try:
             result = (
                 self._get_client()
@@ -147,8 +153,13 @@ class SaasAssetsRepository:
                 .create_signed_url(storage_path, self.settings.supabase_signed_url_ttl_seconds)
             )
             if isinstance(result, dict):
-                return result.get("signedURL") or result.get("signedUrl")
-            return None
+                url = result.get("signedURL") or result.get("signedUrl")
+            else:
+                url = None
+            if url:
+                # Cache below Supabase TTL to avoid re-signing on every list poll.
+                self._signed_url_cache[storage_path] = (url, now + 300)
+            return url
         except Exception as exc:
             logger.warning("saas_signed_url_failed", path=storage_path, error=str(exc))
             return None
@@ -203,8 +214,26 @@ class SaasAssetsRepository:
         rows = result.data or []
         return rows[0] if rows else None
 
-    def _summary_from_row(self, row: dict) -> SaasAssetSummary:
-        latest = self._latest_analysis_for_asset(row["id"])
+    def _latest_analyses_map_for_assets(self, asset_ids: list[str]) -> dict[str, dict]:
+        if not asset_ids:
+            return {}
+        result = (
+            self._table("asset_analyses")
+            .select("*")
+            .in_("asset_id", asset_ids)
+            .order("created_at", desc=True)
+            .execute()
+        )
+        latest_by_asset: dict[str, dict] = {}
+        for row in result.data or []:
+            aid = row.get("asset_id")
+            if aid and aid not in latest_by_asset:
+                latest_by_asset[aid] = row
+        return latest_by_asset
+
+    def _summary_from_row(self, row: dict, *, latest: dict | None = None) -> SaasAssetSummary:
+        if latest is None:
+            latest = self._latest_analysis_for_asset(row["id"])
         summary_fields: dict[str, str | None] = {}
         latest_id = None
         failure_summary = None
@@ -447,7 +476,10 @@ class SaasAssetsRepository:
         )
         rows = result.data or []
         total = result.count if result.count is not None else len(rows)
-        return [self._summary_from_row(r) for r in rows], total
+        latest_map = self._latest_analyses_map_for_assets([r["id"] for r in rows])
+        return [
+            self._summary_from_row(r, latest=latest_map.get(r["id"])) for r in rows
+        ], total
 
     async def get_asset(self, user_id: int, asset_id: str) -> SaasAssetDetailResponse | None:
         return await asyncio.to_thread(self._get_asset_sync, user_id, asset_id)
@@ -929,25 +961,74 @@ class SaasAssetsRepository:
         if asset_image:
             path = self._asset_image_path(user_id, asset_id, "asset")
             self._upload_bytes(path, asset_image, asset_mime)
-            upd = (
-                self._table("registered_assets")
-                .update({"asset_image_path": path})
-                .eq("id", asset_id)
-                .execute()
-            )
-            row = (upd.data or [row])[0]
+            self._table("registered_assets").update({"asset_image_path": path}).eq(
+                "id", asset_id
+            ).execute()
+            row["asset_image_path"] = path
+            self._signed_url_cache.pop(path, None)
         if barcode_image:
             path = self._asset_image_path(user_id, asset_id, "barcode")
             self._upload_bytes(path, barcode_image, barcode_mime)
-            upd = (
-                self._table("registered_assets")
-                .update({"barcode_image_path": path})
-                .eq("id", asset_id)
-                .execute()
-            )
-            row = (upd.data or [row])[0]
+            self._table("registered_assets").update({"barcode_image_path": path}).eq(
+                "id", asset_id
+            ).execute()
+            row["barcode_image_path"] = path
+            self._signed_url_cache.pop(path, None)
+
+        refetch = (
+            self._table("registered_assets")
+            .select("*")
+            .eq("id", asset_id)
+            .eq("user_id", user_id)
+            .limit(1)
+            .execute()
+        )
+        if refetch.data:
+            row = refetch.data[0]
 
         return self._summary_from_row(row)
+
+    async def apply_session_images_to_asset(
+        self, user_id: int, asset_id: str, session_token: str
+    ) -> SaasAssetSummary | None:
+        return await asyncio.to_thread(
+            self._apply_session_images_to_asset_sync, user_id, asset_id, session_token
+        )
+
+    def _apply_session_images_to_asset_sync(
+        self, user_id: int, asset_id: str, session_token: str
+    ) -> SaasAssetSummary | None:
+        session = self._fetch_session_by_token_sync(session_token)
+        if not session:
+            raise ValueError("Session not found")
+        if session.get("status") == "expired":
+            raise SessionExpiredError("Session expired")
+        if session.get("status") == "completed":
+            raise SessionCompletedError("Session already used")
+
+        draft = session.get("draft_json") or {}
+        existing_id = draft.get("_existing_asset_id")
+        if existing_id and str(existing_id) != str(asset_id):
+            raise ValueError("Session does not match this asset")
+
+        asset_image = None
+        barcode_image = None
+        if session.get("asset_image_path"):
+            asset_image = self._download_bytes(session["asset_image_path"])
+        if session.get("barcode_image_path"):
+            barcode_image = self._download_bytes(session["barcode_image_path"])
+        if not asset_image:
+            raise ValueError("Session has no asset image")
+
+        return self._update_asset_sync(
+            user_id,
+            asset_id,
+            {},
+            asset_image,
+            barcode_image,
+            "image/jpeg",
+            "image/jpeg",
+        )
 
     async def delete_asset(self, user_id: int, asset_id: str) -> bool:
         return await asyncio.to_thread(self._delete_asset_sync, user_id, asset_id)

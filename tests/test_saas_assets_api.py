@@ -360,3 +360,56 @@ def test_analyze_with_metadata_patch(saas_settings):
         )
     assert response.status_code == 200
     bg.assert_awaited_once()
+
+
+def test_upload_asset_images_success(saas_settings):
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    mock_repo.get_asset = AsyncMock(
+        return_value=SaasAssetDetailResponse(asset=_asset_summary(), latest_analysis=None)
+    )
+    mock_repo.update_asset = AsyncMock(return_value=_asset_summary(ai_status="analyzing"))
+    mock_repo.log_activity = AsyncMock()
+    mock_repo.set_ai_status = AsyncMock()
+    mock_repo.get_asset.side_effect = [
+        SaasAssetDetailResponse(asset=_asset_summary(), latest_analysis=None),
+        SaasAssetDetailResponse(asset=_asset_summary(ai_status="analyzing"), latest_analysis=None),
+    ]
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: saas_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    client = TestClient(app)
+
+    with patch("app.api.v1.saas_assets._background_analyze", new_callable=AsyncMock) as bg:
+        response = client.post(
+            f"/v1/saas/assets/{TEST_ASSET_ID}/images",
+            files={"assetimage": ("asset.jpg", b"fake-image", "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["asset"]["ai_status"] == "analyzing"
+    mock_repo.update_asset.assert_awaited_once()
+    mock_repo.log_activity.assert_awaited_once()
+    mock_repo.set_ai_status.assert_awaited_once()
+    bg.assert_awaited_once()
+
+
+def test_upload_asset_images_requires_asset_image_when_missing(saas_settings):
+    mock_repo = MagicMock()
+    mock_repo.enabled = True
+    mock_repo.get_asset = AsyncMock(
+        return_value=SaasAssetDetailResponse(asset=_asset_summary(), latest_analysis=None)
+    )
+
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: saas_settings
+    app.dependency_overrides[get_repo] = lambda: mock_repo
+    client = TestClient(app)
+
+    response = client.post(
+        f"/v1/saas/assets/{TEST_ASSET_ID}/images",
+        files={"barcodeimage": ("barcode.jpg", b"fake-image", "image/jpeg")},
+    )
+    assert response.status_code == 400
+    assert "Asset image is required" in response.json()["detail"]

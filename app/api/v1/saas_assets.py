@@ -45,6 +45,7 @@ from app.models.saas_assets import (
     SaasDashboardStats,
     SaveWebDraftRequest,
     RegisterAssetRequest,
+    UpdateAssetRequest,
     UpdateAssetResponse,
     WebDraftItem,
     WebDraftListResponse,
@@ -60,6 +61,8 @@ from app.services.saas_assets_repository import (
 )
 from app.services.saas_lookups import get_lookups
 from app.utils.uploads import _finalize_image_bytes
+
+UpdateAssetRequest.model_rebuild()
 
 router = APIRouter(prefix="/saas", tags=["saas"])
 logger = structlog.get_logger()
@@ -518,8 +521,8 @@ async def register_asset(
 )
 async def update_asset(
     asset_id: UUID,
-    body: UpdateAssetRequest,
     background_tasks: BackgroundTasks,
+    body: UpdateAssetRequest = Body(),
     reanalyze: Annotated[bool, Query()] = False,
     repo: SaasAssetsRepository = Depends(get_repo),
     settings: Settings = Depends(get_settings),
@@ -544,6 +547,96 @@ async def update_asset(
         detail = await repo.get_asset(settings.demo_user_id, str(asset_id))
         if detail:
             return UpdateAssetResponse(asset=detail.asset)
+    return UpdateAssetResponse(asset=updated)
+
+
+@router.post(
+    "/assets/{asset_id}/images",
+    response_model=UpdateAssetResponse,
+    dependencies=[Depends(verify_demo_api_key)],
+)
+async def upload_asset_images(
+    asset_id: UUID,
+    background_tasks: BackgroundTasks,
+    assetimage: Annotated[UploadFile | None, File()] = None,
+    barcodeimage: Annotated[UploadFile | None, File()] = None,
+    reanalyze: Annotated[bool, Query()] = True,
+    repo: SaasAssetsRepository = Depends(get_repo),
+    settings: Settings = Depends(get_settings),
+    rate_limiter: RateLimiter = Depends(get_saas_rate_limiter),
+) -> UpdateAssetResponse:
+    """Upload photos to an existing asset. Starts AI analysis when asset image is provided."""
+    rate_limiter.check("saas_assets")
+    _require_saas(repo)
+
+    detail = await repo.get_asset(settings.demo_user_id, str(asset_id))
+    if not detail:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    has_existing_asset_image = bool(detail.asset.asset_image_url)
+    if not assetimage and not barcodeimage:
+        raise HTTPException(status_code=400, detail="Provide assetimage or barcodeimage")
+    if not assetimage and not has_existing_asset_image:
+        raise HTTPException(status_code=400, detail="Asset image is required")
+
+    asset_bytes = None
+    asset_mime = "image/jpeg"
+    barcode_bytes = None
+    barcode_mime = "image/jpeg"
+
+    try:
+        if assetimage and assetimage.filename:
+            raw = await assetimage.read()
+            _, _, asset_bytes = _finalize_image_bytes(
+                raw,
+                assetimage.filename or "asset.jpg",
+                assetimage.content_type,
+                settings,
+            )
+            asset_mime = assetimage.content_type or "image/jpeg"
+        if barcodeimage and barcodeimage.filename:
+            raw_barcode = await barcodeimage.read()
+            _, _, barcode_bytes = _finalize_image_bytes(
+                raw_barcode,
+                barcodeimage.filename or "barcode.jpg",
+                barcodeimage.content_type,
+                settings,
+            )
+            barcode_mime = barcodeimage.content_type or "image/jpeg"
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    updated = await repo.update_asset(
+        settings.demo_user_id,
+        str(asset_id),
+        {},
+        asset_image=asset_bytes,
+        barcode_image=barcode_bytes,
+        asset_mime=asset_mime,
+        barcode_mime=barcode_mime,
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    await repo.log_activity(
+        settings.demo_user_id,
+        "photos_uploaded",
+        f"Photos added for {updated.assetname or updated.assetid}",
+        asset_id=str(asset_id),
+        assetname=updated.assetname,
+        assetid=updated.assetid,
+    )
+
+    should_analyze = reanalyze and (asset_bytes is not None or has_existing_asset_image)
+    if should_analyze:
+        await repo.set_ai_status(str(asset_id), "analyzing")
+        background_tasks.add_task(
+            _background_analyze, settings, str(asset_id), settings.demo_user_id, None
+        )
+        detail = await repo.get_asset(settings.demo_user_id, str(asset_id))
+        if detail:
+            return UpdateAssetResponse(asset=detail.asset)
+
     return UpdateAssetResponse(asset=updated)
 
 
